@@ -46,6 +46,8 @@ const IonicApp: React.FC = () => {
 
   useEffect(() => {
     const check = localStorage.getItem("loggedInId") ? true : false;
+    const loggedInData :any = localStorage.getItem("loggedInData") ? localStorage.getItem("loggedInData") : null;
+    console.log(JSON.parse(loggedInData));
     setIsLoggedIn(check);
   }, []);
 

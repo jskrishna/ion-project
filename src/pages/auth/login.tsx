@@ -41,6 +41,7 @@ const Login: React.FC = () => {
             console.log(res.data.data.id);
             localStorage.setItem('loggedIn', 'true');
             localStorage.setItem('loggedInId', res.data.data.id);
+            localStorage.setItem('loggedInData', JSON.stringify(res.data.data));
             user.setIsLoggedIn(true);
             history.push("/dashboard");
            })
