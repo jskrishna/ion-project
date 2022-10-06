@@ -1,6 +1,6 @@
 import { IonButton, IonContent, IonImg, IonInput, IonItem, IonList, IonPage, IonTitle, IonToolbar } from '@ionic/react';
 
-const Login: React.FC = () => {
+const ForgotPassword: React.FC = () => {
     return (
         <IonPage>
             <IonContent color="custom-gray">
@@ -33,4 +33,4 @@ const Login: React.FC = () => {
     );
 };
 
-export default Login;
+export default ForgotPassword;
