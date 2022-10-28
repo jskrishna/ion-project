@@ -11,7 +11,7 @@ const ForgotPassword: React.FC = () => {
                     <div className='auth-header'>
                         <IonToolbar>
                             <IonTitle>Forgot Password?</IonTitle>
-                            <IonTitle size="small">Enter your email below to retrieve your account</IonTitle>
+                            <p>Enter your email below to retrieve your account</p>
                         </IonToolbar>
                     </div>
                     <div className='form-wrap'>

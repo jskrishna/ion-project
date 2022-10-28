@@ -9,13 +9,11 @@ import {
   IonLabel,
 } from "@ionic/react";
 import { Redirect, Route } from "react-router";
-import { gridOutline, homeSharp, listCircleSharp, personCircleSharp, settingsOutline, timerOutline } from "ionicons/icons";
+import { homeSharp, listCircleSharp, personCircleSharp } from "ionicons/icons";
 import { IonReactRouter } from "@ionic/react-router";
-import Login from "./pages/auth/login";
-import SignUp from "./pages/auth/sign-up";
-import Tab2 from "./pages/Tab2";
-import Tab3 from "./pages/Tab3";
+import Tab3 from "./pages/Profile";
 import Dashboard from "./pages/Dashboard";
+import DoctorList from "./pages/DoctorList";
 
 const MainTabs: React.FC = () => {
   return (
@@ -27,10 +25,10 @@ const MainTabs: React.FC = () => {
            <Route exact path="/dashboard">
              <Dashboard />
            </Route>
-           <Route exact path="/tab2">
-             <Tab2 />
+           <Route exact path="/doctor-list">
+             <DoctorList />
            </Route>
-           <Route path="/tab3">
+           <Route path="/profile">
              <Tab3 />
            </Route>
            <Route path="/forgot-password">
@@ -51,11 +49,11 @@ const MainTabs: React.FC = () => {
              <IonIcon icon={homeSharp} />
              <IonLabel>Dashboard</IonLabel>
            </IonTabButton>
-           <IonTabButton tab="tab2" href="/tab2">
+           <IonTabButton tab="doctor-list" href="/doctor-list">
              <IonIcon icon={listCircleSharp} />
-             <IonLabel>Users</IonLabel>
+             <IonLabel>Doctors</IonLabel>
            </IonTabButton>
-           <IonTabButton tab="tab3" href="/tab3">
+           <IonTabButton tab="profile" href="/profile">
              <IonIcon icon={personCircleSharp} />
              <IonLabel>Profile</IonLabel>
            </IonTabButton>

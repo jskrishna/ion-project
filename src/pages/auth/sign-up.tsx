@@ -77,9 +77,9 @@ const SignUp: React.FC = () => {
           <div className="auth-header">
             <IonToolbar>
               <IonTitle>Get Started!</IonTitle>
-              <IonTitle size="small">
+              <p>
                 Create an account with us to get all features
-              </IonTitle>
+              </p>
               <IonAlert
                     isOpen={iserror}
                     onDidDismiss={() => setIserror(false)}

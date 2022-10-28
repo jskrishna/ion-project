@@ -1,0 +1,28 @@
+
+
+
+@media(max-width:991px) {
+    .form-builder-wrap .react-form-builder .react-form-builder-preview .edit-form {
+        max-width: calc(100% - 20px);
+    }
+    .form-builder-wrap .react-form-builder>div {
+        display: flex;
+        width: 100%;
+        flex-direction: column-reverse;
+    }
+    .form-builder-wrap .col-md-3 {
+        width: 100% !important;
+        padding: 0;
+        position: initial !important;
+        border: 0;
+
+    }
+    .form-builder-wrap .react-form-builder .react-form-builder-preview {
+        padding: 20px 0;
+        width: calc(100% - 0px) !important;
+    }
+    .btn-wrap {
+        width: 100%;
+        margin-left: 0;
+    }
+}

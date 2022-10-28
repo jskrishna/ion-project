@@ -27,7 +27,9 @@ import MainTabs from "./MainTabs";
 import ForgotPassword from "./pages/auth/forgot-password";
 import SignUp from "./pages/auth/sign-up";
 
-setupIonicReact();
+setupIonicReact({
+  // mode: 'ios',
+});
 interface IUserManager {
   setIsLoggedIn: Function;
 }
@@ -35,6 +37,7 @@ interface IUserManager {
 const user: IUserManager = {
   setIsLoggedIn: () => {},
 };
+
 
 export const UserContext = React.createContext<IUserManager>(user);
 
