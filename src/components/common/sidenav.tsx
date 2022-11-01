@@ -1,6 +1,6 @@
 import { IonButton, IonContent, IonFooter, IonHeader, IonIcon, IonItem, IonLabel, IonList, IonMenu, IonTitle, IonToolbar } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
-import { logOutOutline } from 'ionicons/icons';
+import { addCircle, homeOutline, logOutOutline, person } from 'ionicons/icons';
 import { useContext } from 'react';
 import { useHistory } from 'react-router';
 import { UserContext } from '../../App';
@@ -26,12 +26,18 @@ const SideNav: React.FC = () => {
         <IonContent className="no-padding">
           <IonList className='menu-wrap'>
             <IonItem routerLink="/dashboard/">
+            <IonIcon icon={homeOutline} />
               <IonLabel>Dashboard</IonLabel>
             </IonItem>
-            <IonItem routerLink="/doctor-list">
-              <IonLabel>Doctors</IonLabel>
+            <IonItem routerLink="/new-post">
+            <IonIcon icon={addCircle} />
+              <IonLabel>New Post</IonLabel>
             </IonItem>
+            {/* <IonItem routerLink="/doctor-list">
+              <IonLabel>Doctors</IonLabel>
+            </IonItem> */}
             <IonItem routerLink="/profile">
+            <IonIcon icon={person} />
               <IonLabel>Profile</IonLabel>
             </IonItem>
           </IonList>

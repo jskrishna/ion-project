@@ -2,29 +2,11 @@ import { IonAvatar, IonButton, IonButtons, IonCard, IonCardContent, IonCol, IonC
 import { chatbubbles, ellipsisVertical, shareSocial, thumbsUp } from 'ionicons/icons';
 import SideNav from '../components/common/sidenav';
 import './Dashboard.css';
-import { OverlayEventDetail } from '@ionic/core/components';
 import { useEffect, useRef, useState } from 'react';
 import { Share } from '@capacitor/share';
 
 const Dashboard: React.FC = () => {
   const modal = useRef<HTMLIonModalElement>(null);
-  const input = useRef<HTMLIonInputElement>(null);
-
-  const [message, setMessage] = useState(
-    'This modal example uses triggers to automatically open a modal when the button is clicked.'
-  );
-
-  function confirm() {
-    modal.current?.dismiss(input.current?.value, 'confirm');
-  }
-
-  function onWillDismiss(ev: CustomEvent<OverlayEventDetail>) {
-    if (ev.detail.role === 'confirm') {
-      setMessage(`Hello, ${ev.detail.data}!`);
-    }
-  }
-
-  const Modal = useRef<HTMLIonModalElement>(null);
   const page = useRef(null);
 
   const [presentingElement, setPresentingElement] = useState<HTMLElement | null>(null);
@@ -143,7 +125,7 @@ const Dashboard: React.FC = () => {
                         <p>
                           {ReadyArray.includes('1') ? "Keep close to Nature's heart and break clear away, once in awhile, and climb a mountain or spend a week in the woods. Wash your spirit clean" : `${`Keep close to Nature's heart and break clear away, once in awhile,
                           and climb a mountain or spend a week in the woods. Wash your spirit clean`.substring(0, 40)}...`}
-                          <a onClick={() => handleClick("1")} href="javascript:void(0)">{ReadyArray.includes('1') ? " Show less" : " Read more"}</a></p>
+                          <span className='readmore' onClick={() => handleClick("1")}>{ReadyArray.includes('1') ? " Show less" : " Read more"}</span></p>
                         <div className='post-img' id="open-modal">
                           <img src="https://images.ctfassets.net/hrltx12pl8hq/7yQR5uJhwEkRfjwMFJ7bUK/dc52a0913e8ff8b5c276177890eb0129/offset_comp_772626-opt.jpg?fit=fill&w=800&h=300" alt="" />
                         </div>
@@ -200,7 +182,8 @@ const Dashboard: React.FC = () => {
                         <p>
                           {ReadyArray.includes('2') ? "Keep close to Nature's heart and break clear away, once in awhile, and climb a mountain or spend a week in the woods. Wash your spirit clean" : `${`Keep close to Nature's heart and break clear away, once in awhile,
                           and climb a mountain or spend a week in the woods. Wash your spirit clean`.substring(0, 40)}...`}
-                          <a onClick={() => handleClick("2")} href="javascript:void(0)">{ReadyArray.includes('2') ? " Show less" : " Read more"}</a></p>
+                          <span className='readmore' onClick={() => handleClick("2")}>{ReadyArray.includes('1') ? " Show less" : " Read more"}</span></p>
+
                         <div className='post-img' id="open-modal">
                           <img src="https://images.ctfassets.net/hrltx12pl8hq/7yQR5uJhwEkRfjwMFJ7bUK/dc52a0913e8ff8b5c276177890eb0129/offset_comp_772626-opt.jpg?fit=fill&w=800&h=300" alt="" />
                         </div>
@@ -257,7 +240,8 @@ const Dashboard: React.FC = () => {
                         <p>
                           {ReadyArray.includes('3') ? "Keep close to Nature's heart and break clear away, once in awhile, and climb a mountain or spend a week in the woods. Wash your spirit clean" : `${`Keep close to Nature's heart and break clear away, once in awhile,
                           and climb a mountain or spend a week in the woods. Wash your spirit clean`.substring(0, 40)}...`}
-                          <a onClick={() => handleClick("3")} href="javascript:void(0)">{ReadyArray.includes('3') ? " Show less" : " Read more"}</a></p>
+                          <span className='readmore' onClick={() => handleClick("3")}>{ReadyArray.includes('1') ? " Show less" : " Read more"}</span></p>
+
                         <div className='post-img' id="open-modal">
                           <img src="https://images.ctfassets.net/hrltx12pl8hq/7yQR5uJhwEkRfjwMFJ7bUK/dc52a0913e8ff8b5c276177890eb0129/offset_comp_772626-opt.jpg?fit=fill&w=800&h=300" alt="" />
                         </div>
@@ -314,7 +298,8 @@ const Dashboard: React.FC = () => {
                         <p>
                           {ReadyArray.includes('4') ? "Keep close to Nature's heart and break clear away, once in awhile, and climb a mountain or spend a week in the woods. Wash your spirit clean" : `${`Keep close to Nature's heart and break clear away, once in awhile,
                           and climb a mountain or spend a week in the woods. Wash your spirit clean`.substring(0, 40)}...`}
-                          <a onClick={() => handleClick("4")} href="javascript:void(0)">{ReadyArray.includes('4') ? " Show less" : " Read more"}</a></p>
+                          <span className='readmore' onClick={() => handleClick("4")}>{ReadyArray.includes('1') ? " Show less" : " Read more"}</span></p>
+
                         <div className='post-img' id="open-modal">
                           <img src="https://images.ctfassets.net/hrltx12pl8hq/7yQR5uJhwEkRfjwMFJ7bUK/dc52a0913e8ff8b5c276177890eb0129/offset_comp_772626-opt.jpg?fit=fill&w=800&h=300" alt="" />
                         </div>
@@ -371,7 +356,8 @@ const Dashboard: React.FC = () => {
                         <p>
                           {ReadyArray.includes('5') ? "Keep close to Nature's heart and break clear away, once in awhile, and climb a mountain or spend a week in the woods. Wash your spirit clean" : `${`Keep close to Nature's heart and break clear away, once in awhile,
                           and climb a mountain or spend a week in the woods. Wash your spirit clean`.substring(0, 50)}...`}
-                          <a onClick={() => handleClick("5")} href="javascript:void(0)">{ReadyArray.includes('5') ? " Show less" : " Read more"}</a></p>
+                          <span className='readmore' onClick={() => handleClick("5")}>{ReadyArray.includes('1') ? " Show less" : " Read more"}</span></p>
+
                         <div className='post-img' id="open-modal">
                           <img src="https://images.ctfassets.net/hrltx12pl8hq/7yQR5uJhwEkRfjwMFJ7bUK/dc52a0913e8ff8b5c276177890eb0129/offset_comp_772626-opt.jpg?fit=fill&w=800&h=300" alt="" />
                         </div>
@@ -428,7 +414,7 @@ const Dashboard: React.FC = () => {
                         <p>
                           {ReadyArray.includes('6') ? "Keep close to Nature's heart and break clear away, once in awhile, and climb a mountain or spend a week in the woods. Wash your spirit clean" : `${`Keep close to Nature's heart and break clear away, once in awhile,
                           and climb a mountain or spend a week in the woods. Wash your spirit clean`.substring(0, 60)}...`}
-                          <a onClick={() => handleClick("6")} href="javascript:void(0)">{ReadyArray.includes('6') ? " Show less" : " Read more"}</a></p>
+                          <span className='readmore' onClick={() => handleClick("6")}>{ReadyArray.includes('1') ? " Show less" : " Read more"}</span></p>
                         <div className='post-img' id="open-modal">
                           <img src="https://images.ctfassets.net/hrltx12pl8hq/7yQR5uJhwEkRfjwMFJ7bUK/dc52a0913e8ff8b5c276177890eb0129/offset_comp_772626-opt.jpg?fit=fill&w=800&h=300" alt="" />
                         </div>

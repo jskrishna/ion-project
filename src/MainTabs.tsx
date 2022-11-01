@@ -9,11 +9,12 @@ import {
   IonLabel,
 } from "@ionic/react";
 import { Redirect, Route } from "react-router";
-import { homeSharp, listCircleSharp, personCircleSharp } from "ionicons/icons";
+import { homeSharp, listCircleSharp, personCircleSharp, pulseOutline } from "ionicons/icons";
 import { IonReactRouter } from "@ionic/react-router";
 import Tab3 from "./pages/Profile";
 import Dashboard from "./pages/Dashboard";
 import DoctorList from "./pages/DoctorList";
+import NewPost from "./pages/NewPost";
 
 const MainTabs: React.FC = () => {
   return (
@@ -27,6 +28,9 @@ const MainTabs: React.FC = () => {
            </Route>
            <Route exact path="/doctor-list">
              <DoctorList />
+           </Route>
+           <Route exact path="/new-post">
+             <NewPost />
            </Route>
            <Route path="/profile">
              <Tab3 />
@@ -48,6 +52,10 @@ const MainTabs: React.FC = () => {
            <IonTabButton tab="dashboard" href="/dashboard">
              <IonIcon icon={homeSharp} />
              <IonLabel>Dashboard</IonLabel>
+           </IonTabButton>
+           <IonTabButton tab="new-post" href="/new-post">
+             <IonIcon icon={pulseOutline} />
+             <IonLabel>New Post</IonLabel>
            </IonTabButton>
            <IonTabButton tab="doctor-list" href="/doctor-list">
              <IonIcon icon={listCircleSharp} />
