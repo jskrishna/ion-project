@@ -124,3 +124,83 @@ ion-avatar {
   color: #fff;
   text-align: center;
 } */
+
+
+body {
+  font-family: 'Helvetica';
+  background-color: #0e2439;
+}
+
+.filter-buttons {
+  display: flex;
+  margin-bottom: 20px;
+  color: black;
+}
+.filter-buttons .active-view {
+  color:white;
+  background: var(--ion-color-primary, #3880ff)
+}
+
+
+.list-view-button,
+.grid-view-button {
+  color: rgb(2, 47, 248);
+  border: 1px solid rgb(173, 230, 208);
+  padding: 5px;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 3px;
+}
+.post-img img, .post-img video, .post-img audio{
+  width: 320px;
+  height: 240px;
+}
+.list a {
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.list-view-button:hover,
+.grid-view-button:hover {
+  background: rgb(99, 180, 255);
+  color: #0e2439;
+}
+
+.list-view-button {
+  margin-right: 10px;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+}
+
+li {
+  background-color: #1f364d;
+  color: white;
+  border-radius: 3px;
+  margin-bottom: 10px;
+  transition: 0.3s;
+}
+
+
+.list.list-view-filter {
+  flex-direction: column;
+}
+
+.list.list-view-filter li {
+  padding: 10px;
+}
+
+.list.grid-view-filter {
+  flex-flow: row wrap;
+}
+
+.list.grid-view-filter li {
+  width: calc(50% - 210px);
+  padding: 100px;
+  margin-right: 10px;
+  text-align: center;
+}

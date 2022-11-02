@@ -471,7 +471,7 @@ const Dashboard: React.FC = () => {
                   </IonCard>
                 </IonCol>
                 <IonCol>
-                  <IonCard routerLink="/profile">
+                  <IonCard routerLink="/profile/">
                     <IonCardHeader>
                       <div className='card-icon'>
                         <img src="/assets/images/dentistry.png" alt="" />

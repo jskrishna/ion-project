@@ -36,7 +36,7 @@ const SideNav: React.FC = () => {
             {/* <IonItem routerLink="/doctor-list">
               <IonLabel>Doctors</IonLabel>
             </IonItem> */}
-            <IonItem routerLink="/profile">
+            <IonItem routerLink="/profile/">
             <IonIcon icon={person} />
               <IonLabel>Profile</IonLabel>
             </IonItem>

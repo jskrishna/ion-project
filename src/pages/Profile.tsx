@@ -21,24 +21,30 @@ import {
   IonPopover,
   IonRow,
   IonTextarea,
-  IonThumbnail,
   IonTitle,
   IonToolbar,
+  useIonAlert,
   useIonViewDidEnter,
+  useIonViewWillEnter,
 } from "@ionic/react";
 import axios from "axios";
-import { addCircle, chatbubbles, createOutline, ellipsisHorizontal, ellipsisVertical, shareSocial, thumbsUp } from "ionicons/icons";
-import { useEffect, useRef, useState } from "react";
+import {
+  addCircle,
+  chatbubbleSharp,
+  createOutline,
+  ellipsisVertical,
+  heartOutline,
+  heartSharp,
+  shareSocial,
+} from "ionicons/icons";
+import { useRef, useState } from "react";
 import SideNav from "../components/common/sidenav";
 import Constent from "../components/Constent";
 import "./Profile.css";
 
 const Profile: React.FC = () => {
-  var human = require('human-time');
-  var loggedInData: any = localStorage.getItem("loggedInData")
-    ? localStorage.getItem("loggedInData")
-    : null;
-  loggedInData = JSON.parse(loggedInData);
+  var human = require("human-time");
+
   const modal = useRef<HTMLIonModalElement>(null);
   function dismiss() {
     modal.current?.dismiss();
@@ -47,13 +53,53 @@ const Profile: React.FC = () => {
   const [message, setMessage] = useState<string>("");
   const [showLoading, setShowLoading] = useState(false);
   const [ReadyArray, setReadyArray] = useState<any>([]);
+  const [presentAlert] = useIonAlert();
   const handleClick = (e: any) => {
     if (ReadyArray.includes(e)) {
-      setReadyArray(ReadyArray.filter((item :any) => item !== e));
+      setReadyArray(ReadyArray.filter((item: any) => item !== e));
     } else {
       setReadyArray([...ReadyArray, e]);
     }
   };
+
+  var loggedInData: any = localStorage.getItem("loggedInData")
+    ? localStorage.getItem("loggedInData")
+    : null;
+  loggedInData = JSON.parse(loggedInData);
+
+  const getloggedindata = () => {
+    api
+      .get(`/getloggedindata/` + loggedInData.id)
+      .then((res: any) => {
+        localStorage.setItem("loggedInData", JSON.stringify(res.data.data));
+        var mydata = res.data.data;
+        setValues({ ...values, ...{ ["email"]: mydata.email } });
+        setValues({ ...values, ...{ ["username"]: mydata.username } });
+        setValues({ ...values, ...{ ["mobile"]: mydata.mobile } });
+        setValues({ ...values, ...{ ["profile"]: mydata.profile } });
+        setValues({ ...values, ...{ ["bio"]: mydata.bio } });
+        setShowLoading(false);
+      })
+      .catch((e) => {
+        console.log(e);
+        if (e.response && e.response.data && e.response.data.message) {
+          setMessage(e.response.data.message);
+        } else {
+          setMessage("Auth failure!");
+        }
+        setIserror(true);
+        setShowLoading(false);
+      });
+  };
+
+  useIonViewDidEnter(() => {});
+
+  useIonViewWillEnter(() => {
+    getloggedindata();
+    setShowLoading(true);
+    getPostdata();
+  });
+
   const [values, setValues] = useState({
     id: loggedInData.id,
     username: loggedInData.username,
@@ -63,13 +109,14 @@ const Profile: React.FC = () => {
   });
 
   const handleChange = (e: any, name: string) => {
-    console.log(e.target.value);
     setValues({
       ...values,
       ...{ [name]: e.target.value },
     });
   };
-
+  const api = axios.create({
+    baseURL: Constent.BASE_URL,
+  });
   const handleUpdate = () => {
     if (!values.username) {
       setMessage("Please enter a valid username");
@@ -88,10 +135,6 @@ const Profile: React.FC = () => {
     }
 
     setShowLoading(true);
-
-    const api = axios.create({
-      baseURL: Constent.BASE_URL,
-    });
     api
       .post("/updateuser", values)
       .then((res: any) => {
@@ -110,19 +153,15 @@ const Profile: React.FC = () => {
         setShowLoading(false);
       });
   };
-const [postdata, setpostdata] = useState([]);
+  const [postdata, setpostdata] = useState([]);
 
   // getposts
   const getPostdata = () => {
-    setShowLoading(true);
-    const api = axios.create({
-      baseURL: Constent.BASE_URL,
-    });
     api
-      .get(`/getposts/`+loggedInData.id)
+      .get(`/getposts/` + loggedInData.id)
       .then((res: any) => {
-        setpostdata(res.data.data)
-        setShowLoading(false);      
+        setpostdata(res.data.data);
+        setShowLoading(false);
       })
       .catch((e) => {
         console.log(e);
@@ -136,23 +175,16 @@ const [postdata, setpostdata] = useState([]);
       });
   };
 
-  useIonViewDidEnter(() => {
-    getPostdata();
-  });
-
-  const handleLike = (user_id: any, post_id: any, user_by:any) => {
+  const handleLike = (user_id: any, post_id: any, user_by: any) => {
     let formData = new FormData();
     formData.append("user_id", user_id);
     formData.append("post_id", post_id);
     formData.append("user_by", user_by);
-    const api = axios.create({
-      baseURL: Constent.BASE_URL,
-    });
     api
       .post("/makeLike", formData)
-      .then((res : any) => {
-          console.log(res.data);
-    getPostdata();
+      .then((res: any) => {
+        console.log(res.data);
+        getPostdata();
       })
       .catch((e) => {
         console.log(e);
@@ -162,8 +194,60 @@ const [postdata, setpostdata] = useState([]);
           console.log("Auth failure!");
         }
       });
-  }
-  
+  };
+
+  const handlearchivepost = (post_id: number) => {
+    api
+      .post(`/archivepost/` + post_id)
+      .then((res: any) => {
+        setShowLoading(false);
+        getPostdata();
+      })
+      .catch((e) => {
+        console.log(e);
+        if (e.response && e.response.data && e.response.data.message) {
+          setMessage(e.response.data.message);
+        } else {
+          setMessage("Auth failure!");
+        }
+        setIserror(true);
+        setShowLoading(false);
+      });
+  };
+
+  const handledeletepost = (post_id: number) => {
+    api
+      .post(`/deletepost/` + post_id)
+      .then((res: any) => {
+        setShowLoading(false);
+        getPostdata();
+      })
+      .catch((e) => {
+        console.log(e);
+        if (e.response && e.response.data && e.response.data.message) {
+          setMessage(e.response.data.message);
+        } else {
+          setMessage("Auth failure!");
+        }
+        setIserror(true);
+        setShowLoading(false);
+      });
+  };
+
+
+const [isListview, setListview] = useState<boolean>(false);
+const listViewButton = () => {
+  setListview(true);
+  console.log('list',isListview);
+}
+const gridViewButton = () => {
+  setListview(false);
+  console.log('grid',isListview);
+}
+// const handleAnchor = (e:any) => {
+//  	e.preventDefault();
+// }
+
   return (
     <>
       <SideNav />
@@ -210,7 +294,11 @@ const [postdata, setpostdata] = useState([]);
                       <IonAvatar>
                         <img
                           text-center="true"
-                          src={loggedInData && loggedInData.profile ? loggedInData.profile: "/assets/images/user.png"}
+                          src={
+                            loggedInData && loggedInData.profile
+                              ? loggedInData.profile
+                              : "/assets/images/user.png"
+                          }
                           alt=""
                         />
                       </IonAvatar>
@@ -293,120 +381,250 @@ const [postdata, setpostdata] = useState([]);
                     </IonItem>
                   </IonList>
                   <IonButton
-                        class="login-btn"
-                        expand="full"
-                        size="default"
-                        shape="round"
-                        onClick={handleUpdate}
-                      >
-                        Update
-                      </IonButton>
+                    class="login-btn"
+                    expand="full"
+                    size="default"
+                    shape="round"
+                    onClick={handleUpdate}
+                  >
+                    Update
+                  </IonButton>
                 </IonContent>
               </IonModal>
               {/* modal end  */}
-              <IonGrid fixed={true}>
-                  {
-                    postdata.map((item:any,index) =>(
-               <IonCard key={index}>
-                <IonItem lines="none">
-                  <IonLabel className='ion-justify-content-between'>
-                    <div className='ion-inline'>
-                      <div>
-                        <h3><b>{loggedInData.username}</b></h3>
-                        <p>
-                          {human(new Date(item['created_at']))}
-                        </p>
-                      </div>
-                      
-                      <div>
-                        <IonIcon id={"trigger"+index} icon={ellipsisVertical} />
-                        <IonPopover trigger={"trigger"+index} size="auto">
-                          <IonContent class="ion-padding">Archive</IonContent>
-                          <IonContent class="ion-padding">Delete</IonContent>
-                        </IonPopover>
-                      </div>
-                    </div>
-                  </IonLabel>
-                </IonItem>
-                <IonCardContent>
-                  <div className='post-detail-wrap'>
-                  <IonItem className='ion-no-padding' lines="none">
-                      <div className=''>
-                        <p>
-                        {ReadyArray.includes(index) ? item['caption'] : item['caption'].substring(0, 40)}
-                          {item['caption'].length > 40 ? <span className='readmore' onClick={() => handleClick(index)}>{ReadyArray.includes(index) ? " Show less" : " Read more"}</span> : ''}
-                          😍</p>
-                        <div className='post-img'>
-                          {item['media_type'] == 'mp4' || item['media_type'] == 'avi'|| item['media_type'] == 'flv'|| item['media_type'] == '3gp'|| item['media_type'] == 'mkv' ? 
-                          <video width="320" height="240" controls>
-                          <source src={item['media']} type="video/mp4"/>
-                          Your browser does not support the video tag.
-                        </video>
-                          : (item['media_type'] == 'mp3' ? 
-                          <audio controls>
-                             <source src={item['media']} type="audio/mpeg"/>
-                           Your browser does not support the audio element.
-                           </audio> : <img src={item['media']} alt="" />)
-                    }
+              <div className="filter-buttons">
+              <div className={isListview ? 'active-view list-view-button' : 'list-view-button'} onClick={listViewButton}><i className="fa fa-bars" aria-hidden="true" ></i> List view</div>
+              <div className={!isListview ? 'active-view grid-view-button' : 'grid-view-button'} onClick={gridViewButton}><i className="fa fa-th-large" aria-hidden="true"></i> Grid view</div>
+            </div>
+              <IonGrid className={isListview ? 'list list-view-filter' : 'list grid-view-filter'} fixed={true}>
+                {postdata.map((item: any, index) => (
+                 <IonCard key={index}>
+                    <IonItem lines="none">
+                      <IonLabel className="ion-justify-content-between">
+                        <div className="ion-inline">
+                          <div>
+                            <h3>
+                              <b>{loggedInData.username}</b>
+                            </h3>
+                            <p>{human(new Date(item["created_at"]))}</p>
                           </div>
-                      </div>
+                          <div>
+                            <IonIcon
+                              id={"trigger" + index}
+                              icon={ellipsisVertical}
+                            />
+                            <IonPopover
+                              dismissOnSelect={true}
+                              trigger={"trigger" + index}
+                              size="auto"
+                            >
+                              <IonContent
+                                class="ion-padding"
+                                onClick={() =>
+                                  presentAlert({
+                                    header:
+                                      "Are you sure to archive this post?",
+                                    buttons: [
+                                      {
+                                        text: "Cancel",
+                                        role: "cancel",
+                                        handler: () => {},
+                                      },
+                                      {
+                                        text: "OK",
+                                        role: "confirm",
+                                        handler: () => {
+                                          handlearchivepost(item["id"]);
+                                        },
+                                      },
+                                    ],
+                                  })
+                                }
+                              >
+                                Archive
+                              </IonContent>
+                              <IonContent
+                                class="ion-padding"
+                                onClick={() =>
+                                  presentAlert({
+                                    header: "Are you sure?",
+                                    buttons: [
+                                      {
+                                        text: "Cancel",
+                                        role: "cancel",
+                                        handler: () => {},
+                                      },
+                                      {
+                                        text: "yes, Delete",
+                                        role: "confirm",
+                                        handler: () => {
+                                          handledeletepost(item["id"]);
+                                        },
+                                      },
+                                    ],
+                                  })
+                                }
+                              >
+                                Delete
+                              </IonContent>
+                            </IonPopover>
+                          </div>
+                        </div>
+                      </IonLabel>
                     </IonItem>
-                  </div>
-                  <div className='action-wrap'>
-                    <IonGrid >
-                      <IonRow>
-                        <IonCol col-3 className='ion-no-padding'>
-                          <IonButton onClick={(e) => handleLike(loggedInData.id,item['id'],loggedInData.id)} expand="block" fill='clear'>
-                            <IonIcon icon={thumbsUp} />
-                          </IonButton>
-                        </IonCol>
-                        <IonCol col-3 className='ion-no-padding'>
-                          <IonButton expand="block" fill='clear'>
-                            <IonIcon icon={chatbubbles} />
-                          </IonButton>
-                        </IonCol>
-                        <IonCol col-3 className='ion-no-padding'>
-                          <IonButton expand="block" fill='clear'>
-                            <IonIcon icon={shareSocial} />
-                          </IonButton>
-                        </IonCol>
-                      </IonRow>
-                      {
-                      item['like_count'] == 2 ? 
-                      <p>Liked by {<span><b>{item['like'][0].username}</b>&nbsp;and&nbsp;<b>{item['like'][1].username}</b></span>}</p>
-                      : (item['like_count'] == 0 ? '' : 
-                      (item['like_count'] == 1 ? <p>Liked by {<span><b>{item['like'][0].username}</b></span>}</p> : 
-                      (
-                        item['like_count'] > 2 ? <p>Liked by {<span><b>{item['like'][0].username}</b>&nbsp;and&nbsp;<b>{(item['like_count']-1)} others</b></span>}</p> : ''
-                      )
-                      )
-                      )
-                    }
-                      
-                      <div className="comments">
-                        <span>
-                          {
-                      item['comment_count'] == 0 ? '' : (item['comment_count'] == 1 ? 'View comment': (item['comment_count'] > 1 ?
-                      'view all '+  item['comment_count'] + ' comments'
-                       : '' ))
-                          }
-                          
-                          </span>
-                          {
-                            item['comment_count'] > 0 ?
-                           <span>
-                              <p><b> {item['comment'][0].username}</b> { item['comment'][0].comment}</p>
-                              {item['comment'][1] ? <p><b> {item['comment'][1].username}</b> {item['comment'][1].comment} </p> : '' }
-                           </span> 
-                            : ''
-                          }
+                 <a key={index} id={'post'+index} href={'profile/#post'+index}> 
+
+                    <IonCardContent onClick={listViewButton}>
+                      <div className="post-detail-wrap">
+                        <IonItem className="ion-no-padding" lines="none">
+                          <div className="">
+                            <p>
+                              {ReadyArray.includes(index)
+                                ? item["caption"]
+                                : item["caption"].substring(0, 40)}
+                              {item["caption"].length > 40 ? (
+                                <span
+                                  className="readmore"
+                                  onClick={() => handleClick(index)}
+                                >
+                                  {ReadyArray.includes(index)
+                                    ? " Show less"
+                                    : " Read more"}
+                                </span>
+                              ) : (
+                                ""
+                              )}
+                            </p>
+                            <div className="post-img">
+                              {item["media_type"] == "mp4" ||
+                              item["media_type"] == "avi" ||
+                              item["media_type"] == "flv" ||
+                              item["media_type"] == "3gp" ||
+                              item["media_type"] == "mkv" ? (
+                                <video width="320" height="240" controls>
+                                  <source
+                                    src={item["media"]}
+                                    type="video/mp4"
+                                  />
+                                  Your browser does not support the video tag.
+                                </video>
+                              ) : item["media_type"] == "mp3" ? (
+                                <audio controls>
+                                  <source
+                                    src={item["media"]}
+                                    type="audio/mpeg"
+                                  />
+                                  Your browser does not support the audio
+                                  element.
+                                </audio>
+                              ) : (
+                                <img src={item["media"]} alt="" />
+                              )}
+                            </div>
+                          </div>
+                        </IonItem>
                       </div>
-                    </IonGrid>
-                  </div>
-                </IonCardContent>
-              </IonCard>
-                 ))
-                }
+                      <div className="action-wrap">
+                        <IonGrid>
+                          <IonRow>
+                            <IonCol col-3 className="ion-no-padding">
+                              <IonButton
+                                onClick={(e) =>
+                                  handleLike(
+                                    loggedInData.id,
+                                    item["id"],
+                                    loggedInData.id
+                                  )
+                                }
+                                expand="block"
+                                fill="clear"
+                              >
+                                <IonIcon
+                                  icon={
+                                    item["likeBy"].includes(loggedInData.id)
+                                      ? heartSharp
+                                      : heartOutline
+                                  }
+                                />
+                              </IonButton>
+                            </IonCol>
+                            <IonCol col-3 className="ion-no-padding">
+                              <IonButton expand="block" fill="clear">
+                                <IonIcon icon={chatbubbleSharp} />
+                              </IonButton>
+                            </IonCol>
+                            <IonCol col-3 className="ion-no-padding">
+                              <IonButton expand="block" fill="clear">
+                                <IonIcon icon={shareSocial} />
+                              </IonButton>
+                            </IonCol>
+                          </IonRow>
+                          {item["like_count"] == 2 ? (
+                            <p>
+                              Liked by{" "}
+                              {
+                                <span>
+                                  <b>{item["like"][0].username}</b>
+                                  &nbsp;and&nbsp;
+                                  <b>{item["like"][1].username}</b>
+                                </span>
+                              }
+                            </p>
+                          ) : item["like_count"] == 0 ? (
+                            ""
+                          ) : item["like_count"] == 1 ? (
+                            <p>
+                              Liked by{" "}
+                              {
+                                <span>
+                                  <b>{item["like"][0].username}</b>
+                                </span>
+                              }
+                            </p>
+                          ) : item["like_count"] > 2 ? (
+                            <p>
+                              Liked by{" "}
+                              {
+                                <span>
+                                  <b>{item["like"][0].username}</b>
+                                  &nbsp;and&nbsp;
+                                  <b>{item["like_count"] - 1} others</b>
+                                </span>
+                              }
+                            </p>
+                          ) : (
+                            ""
+                          )}
+
+                          <div className="comments">
+                            <span>
+                              {item["comment_count"] == 0
+                                ? ""
+                                : item["comment_count"] == 1
+                                ? "View comment"
+                                : item["comment_count"] > 1
+                                ? "view all " +
+                                  item["comment_count"] +
+                                  " comments"
+                                : ""}
+                            </span>
+                            {item["comment_count"] > 0 ? (
+                              <span>
+                                <p>
+                                  <b> {item["comment"][0].username}</b>{" "}
+                                  {item["comment"][0].comment}
+                                </p>
+                              </span>
+                            ) : (
+                              ""
+                            )}
+                          </div>
+                        </IonGrid>
+                      </div>
+                    </IonCardContent>
+                  </a>
+                  </IonCard>
+                ))}
               </IonGrid>
             </div>
           </section>

@@ -32,7 +32,7 @@ const MainTabs: React.FC = () => {
            <Route exact path="/new-post">
              <NewPost />
            </Route>
-           <Route path="/profile">
+           <Route path="/profile/">
              <Tab3 />
            </Route>
            <Route path="/forgot-password">
@@ -57,11 +57,11 @@ const MainTabs: React.FC = () => {
              <IonIcon icon={pulseOutline} />
              <IonLabel>New Post</IonLabel>
            </IonTabButton>
-           <IonTabButton tab="doctor-list" href="/doctor-list">
+           {/* <IonTabButton tab="doctor-list" href="/doctor-list">
              <IonIcon icon={listCircleSharp} />
              <IonLabel>Doctors</IonLabel>
-           </IonTabButton>
-           <IonTabButton tab="profile" href="/profile">
+           </IonTabButton> */}
+           <IonTabButton tab="profile" href="/profile/">
              <IonIcon icon={personCircleSharp} />
              <IonLabel>Profile</IonLabel>
            </IonTabButton>

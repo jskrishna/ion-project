@@ -54,7 +54,7 @@ const NewPost: React.FC = () => {
             .then((res : any) => {
                 console.log(res.data);
               setShowLoading(false);
-            history.push("/profile");
+            history.push("/profile/");
             setcaption('');
             })
             .catch((e) => {
@@ -106,7 +106,7 @@ const NewPost: React.FC = () => {
                   cssClass="custom-loading"
                   isOpen={showLoading}
                   onDidDismiss={() => setShowLoading(false)}
-                  message={"Please wait..."}
+                  message={"Uploading..."}
                   spinner='circles'
                 />
         <IonItem>
