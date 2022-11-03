@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   IonTabs,
   IonRouterOutlet,
@@ -9,14 +9,21 @@ import {
   IonLabel,
 } from "@ionic/react";
 import { Redirect, Route } from "react-router";
-import { homeSharp, listCircleSharp, personCircleSharp, pulseOutline } from "ionicons/icons";
+import { heartOutline, homeSharp, personCircleSharp, pulseOutline } from "ionicons/icons";
 import { IonReactRouter } from "@ionic/react-router";
 import Tab3 from "./pages/Profile";
 import Dashboard from "./pages/Dashboard";
 import DoctorList from "./pages/DoctorList";
 import NewPost from "./pages/NewPost";
+import Archived from "./pages/Archived";
+import Notifications from "./pages/Notifications";
+import { useHistory } from "react-router";
 
 const MainTabs: React.FC = () => {
+  const history = useHistory();
+  useEffect(()=>{
+console.log(history.location.pathname);
+  });
   return (
     <>
        <IonApp>
@@ -35,6 +42,12 @@ const MainTabs: React.FC = () => {
            <Route path="/profile/">
              <Tab3 />
            </Route>
+           <Route path="/archived/">
+             <Archived />
+           </Route>
+           <Route path="/notifications/">
+             <Notifications />
+           </Route>
            <Route path="/forgot-password">
            <Redirect to="/dashboard" />
            </Route>
@@ -51,19 +64,19 @@ const MainTabs: React.FC = () => {
          <IonTabBar slot="bottom">
            <IonTabButton tab="dashboard" href="/dashboard">
              <IonIcon icon={homeSharp} />
-             <IonLabel>Dashboard</IonLabel>
+             {/* <IonLabel>Dashboard</IonLabel> */}
            </IonTabButton>
            <IonTabButton tab="new-post" href="/new-post">
              <IonIcon icon={pulseOutline} />
-             <IonLabel>New Post</IonLabel>
+             {/* <IonLabel>New Post</IonLabel> */}
            </IonTabButton>
-           {/* <IonTabButton tab="doctor-list" href="/doctor-list">
-             <IonIcon icon={listCircleSharp} />
-             <IonLabel>Doctors</IonLabel>
-           </IonTabButton> */}
+           <IonTabButton tab="notifications" href="/notifications">
+             <IonIcon icon={heartOutline} />
+             {/* <IonLabel>Notifications</IonLabel> */}
+           </IonTabButton>
            <IonTabButton tab="profile" href="/profile/">
              <IonIcon icon={personCircleSharp} />
-             <IonLabel>Profile</IonLabel>
+             {/* <IonLabel>Profile</IonLabel> */}
            </IonTabButton>
          </IonTabBar>
        </IonTabs>

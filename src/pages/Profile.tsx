@@ -41,10 +41,13 @@ import { useRef, useState } from "react";
 import SideNav from "../components/common/sidenav";
 import Constent from "../components/Constent";
 import "./Profile.css";
+import { Share } from '@capacitor/share';
+import { useHistory } from "react-router-dom";
 
 const Profile: React.FC = () => {
   var human = require("human-time");
-
+  const history = useHistory();
+  
   const modal = useRef<HTMLIonModalElement>(null);
   function dismiss() {
     modal.current?.dismiss();
@@ -98,6 +101,8 @@ const Profile: React.FC = () => {
     getloggedindata();
     setShowLoading(true);
     getPostdata();
+  history.location.hash.includes('list')? setListview(true): setListview(false);
+  console.log(history.location);
   });
 
   const [values, setValues] = useState({
@@ -239,14 +244,20 @@ const [isListview, setListview] = useState<boolean>(false);
 const listViewButton = () => {
   setListview(true);
   console.log('list',isListview);
-}
+};
 const gridViewButton = () => {
   setListview(false);
   console.log('grid',isListview);
 }
-// const handleAnchor = (e:any) => {
-//  	e.preventDefault();
-// }
+
+  const sharing = async (url:any) => {
+    await Share.share({
+        title: 'This post will be shared',
+        text: 'Really awesome post you need to see right now',
+        url: url,
+        dialogTitle: 'Share with Friends',
+      });
+};
 
   return (
     <>
@@ -393,14 +404,38 @@ const gridViewButton = () => {
               </IonModal>
               {/* modal end  */}
               <div className="filter-buttons">
-              <div className={isListview ? 'active-view list-view-button' : 'list-view-button'} onClick={listViewButton}><i className="fa fa-bars" aria-hidden="true" ></i> List view</div>
-              <div className={!isListview ? 'active-view grid-view-button' : 'grid-view-button'} onClick={gridViewButton}><i className="fa fa-th-large" aria-hidden="true"></i> Grid view</div>
-            </div>
-              <IonGrid className={isListview ? 'list list-view-filter' : 'list grid-view-filter'} fixed={true}>
+                <div
+                  className={
+                    !isListview
+                      ? "active-view grid-view-button"
+                      : "grid-view-button"
+                  }
+                  onClick={gridViewButton}
+                >
+                  <i className="fa fa-th-large" aria-hidden="true"></i> Grid
+                  view
+                </div>
+                <div
+                  className={
+                    isListview
+                      ? "active-view list-view-button"
+                      : "list-view-button"
+                  }
+                  onClick={listViewButton}
+                >
+                  <i className="fa fa-bars" aria-hidden="true"></i> List view
+                </div>
+              </div>
+              <IonGrid
+                className={
+                  isListview ? "list list-view-filter" : "list grid-view-filter"
+                }
+                fixed={true}
+              >
                 {postdata.map((item: any, index) => (
-                 <IonCard key={index}>
+                  <IonCard key={index}>
                     <IonItem lines="none">
-                      <IonLabel className="ion-justify-content-between">
+                      <IonLabel className="ion-justify-content-between post-header">
                         <div className="ion-inline">
                           <div>
                             <h3>
@@ -472,13 +507,12 @@ const gridViewButton = () => {
                         </div>
                       </IonLabel>
                     </IonItem>
-                 <a key={index} id={'post'+index} href={'profile/#post'+index}> 
 
                     <IonCardContent onClick={listViewButton}>
                       <div className="post-detail-wrap">
                         <IonItem className="ion-no-padding" lines="none">
                           <div className="">
-                            <p>
+                            <p className="post-caption">
                               {ReadyArray.includes(index)
                                 ? item["caption"]
                                 : item["caption"].substring(0, 40)}
@@ -495,36 +529,43 @@ const gridViewButton = () => {
                                 ""
                               )}
                             </p>
-                            <div className="post-img">
-                              {item["media_type"] == "mp4" ||
-                              item["media_type"] == "avi" ||
-                              item["media_type"] == "flv" ||
-                              item["media_type"] == "3gp" ||
-                              item["media_type"] == "mkv" ? (
-                                <video width="320" height="240" controls>
-                                  <source
-                                    src={item["media"]}
-                                    type="video/mp4"
-                                  />
-                                  Your browser does not support the video tag.
-                                </video>
-                              ) : item["media_type"] == "mp3" ? (
-                                <audio controls>
-                                  <source
-                                    src={item["media"]}
-                                    type="audio/mpeg"
-                                  />
-                                  Your browser does not support the audio
-                                  element.
-                                </audio>
-                              ) : (
-                                <img src={item["media"]} alt="" />
-                              )}
-                            </div>
+                            <a
+                              key={index}
+                              id={"post" + index}
+                              //  href={isListview ? 'Javascript:void(0)' : 'profile/#post'+index}
+                              href={"profile/#post" + index}
+                            >
+                              <div className="post-img">
+                                {item["media_type"] == "mp4" ||
+                                item["media_type"] == "avi" ||
+                                item["media_type"] == "flv" ||
+                                item["media_type"] == "3gp" ||
+                                item["media_type"] == "mkv" ? (
+                                  <video width="320" height="240" controls>
+                                    <source
+                                      src={item["media"]}
+                                      type="video/mp4"
+                                    />
+                                    Your browser does not support the video tag.
+                                  </video>
+                                ) : item["media_type"] == "mp3" ? (
+                                  <audio controls>
+                                    <source
+                                      src={item["media"]}
+                                      type="audio/mpeg"
+                                    />
+                                    Your browser does not support the audio
+                                    element.
+                                  </audio>
+                                ) : (
+                                  <img src={item["media"]} alt="" />
+                                )}
+                              </div>
+                            </a>
                           </div>
                         </IonItem>
                       </div>
-                      <div className="action-wrap">
+                      <div className="action-wrap post-footer">
                         <IonGrid>
                           <IonRow>
                             <IonCol col-3 className="ion-no-padding">
@@ -554,7 +595,9 @@ const gridViewButton = () => {
                               </IonButton>
                             </IonCol>
                             <IonCol col-3 className="ion-no-padding">
-                              <IonButton expand="block" fill="clear">
+                              <IonButton expand="block"
+                          onClick={(e) => sharing('http://localhost:8100/profile/'+loggedInData.username+'/#list/#post'+index)}
+                              fill="clear">
                                 <IonIcon icon={shareSocial} />
                               </IonButton>
                             </IonCol>
@@ -622,7 +665,6 @@ const gridViewButton = () => {
                         </IonGrid>
                       </div>
                     </IonCardContent>
-                  </a>
                   </IonCard>
                 ))}
               </IonGrid>
