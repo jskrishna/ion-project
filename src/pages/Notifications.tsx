@@ -1,5 +1,7 @@
 import {
     IonAlert,
+    IonAvatar,
+    IonButton,
     IonButtons,
     IonCard,
     IonCardContent,
@@ -8,11 +10,14 @@ import {
     IonHeader,
     IonIcon,
     IonItem,
+    IonItemDivider,
+    IonItemGroup,
     IonLabel,
     IonLoading,
     IonMenuButton,
     IonPage,
     IonPopover,
+    IonRouterLink,
     IonTitle,
     IonToolbar,
     useIonAlert,
@@ -21,9 +26,10 @@ import {
   } from "@ionic/react";
   import axios from "axios";
   import {
-    ellipsisVertical,
+    ellipsisVertical, musicalNoteOutline, videocamOutline,
   } from "ionicons/icons";
-  import { useState } from "react";
+  import { useEffect, useState } from "react";
+import { useHistory } from "react-router-dom";
   import SideNav from "../components/common/sidenav";
   import Constent from "../components/Constent";
   import "./Profile.css";
@@ -38,13 +44,17 @@ import {
       ? localStorage.getItem("loggedInData")
       : null;
     loggedInData = JSON.parse(loggedInData);
-    const [postdata, setpostdata] = useState([]);
+    const [TodayNotify, setTodayNotify] = useState(Array);
+    const [YesNotify, setYesNotify] = useState(Array);
+    const [OlderNotify, setOlderNotify] = useState(Array);
     // getposts
-    const getPostdata = () => {
+    const getNotify = () => {
       api
-        .get(`/getposts/` + loggedInData.id)
+        .get(`/getNotifications/` + loggedInData.id)
         .then((res: any) => {
-          setpostdata(res.data.data);
+          setTodayNotify(res.data.today);
+          setYesNotify(res.data.yesterday);
+          setOlderNotify(res.data.older);
           setShowLoading(false);
         })
         .catch((e) => {
@@ -59,9 +69,12 @@ import {
         });
     };
     useIonViewWillEnter(() => {
-        // setShowLoading(true);
-      getPostdata();
     });
+
+    useIonViewDidEnter(()=>{
+      // setShowLoading(true);
+      getNotify();
+    })
 
     const api = axios.create({
       baseURL: Constent.BASE_URL,
@@ -102,22 +115,138 @@ import {
             onIonScrollEnd={() => {}}
           >
             <section>
-              <div className="archive-listing">
-                <IonGrid
-                  className='list list-view-filter'
-                  fixed={true}
-                >
-                  {postdata.map((item: any, index) => (
+            {TodayNotify.length > 0 ?
+              <IonItemGroup>
+              <IonItemDivider>
+                  <IonLabel>Today</IonLabel>
+              </IonItemDivider>
+              {TodayNotify.length > 0 ? TodayNotify.map((item: any, index) => (
+
+                item['user_by'] != loggedInData.id ? 
                     <IonCard key={index}>
-                      <IonItem lines="none">
+                      <IonItem routerLink={"/singlepost/"+item['post_id']} lines="none">
+                      <IonAvatar slot="start">
+                        <img alt='avatar' src={item['profile'] ? item['profile']: "/assets/images/user.png"}/>
+                    </IonAvatar>
                         <IonLabel className="ion-justify-content-between post-header">
-                         Admin liked your post
+                          {item['type'] == 'like'? 
+                        <p>
+                          {item['username']} <b> liked</b> your post.
+                        </p>
+                        : 
+                        <p>
+                          {item['username']} commented<b> {item['comment']}</b> your post.
+                        </p>
+                        }
+                        {
+                            <p>{human(new Date(item['created_at']))}</p>
+                        }
                         </IonLabel>
+                        <IonAvatar slot="end">
+                        {item["media_type"] == "mp4" ||
+                                  item["media_type"] == "avi" ||
+                                  item["media_type"] == "flv" ||
+                                  item["media_type"] == "3gp" ||
+                                  item["media_type"] == "mkv" ? (
+                                  <IonIcon icon={videocamOutline}></IonIcon>
+                                ) : item["media_type"] == "mp3" ? (
+                                  <IonIcon icon={musicalNoteOutline}></IonIcon>
+                                ) : (
+                                  <img alt='post' src={item["media"]} />
+                                )}
+                    </IonAvatar>
                       </IonItem>
                     </IonCard>
-                  ))}
-                </IonGrid>
-              </div>
+                      : ''
+
+                  )) : ''}
+              </IonItemGroup> :''}
+
+              {YesNotify.length > 0 ?
+              <IonItemGroup>
+              <IonItemDivider>
+                  <IonLabel>Yesterday</IonLabel>
+                  
+              </IonItemDivider>
+              {YesNotify.length > 0 ? YesNotify.map((item: any, index) => (
+                item['user_by'] != loggedInData.id ? 
+                    
+                    <IonCard key={index}>
+                      <IonItem routerLink={"/singlepost/"+item['post_id']} lines="none">
+                      <IonAvatar slot="start">
+                        <img alt='avatar' src={item['profile'] ? item['profile']: "/assets/images/user.png"}/>
+                    </IonAvatar>
+                        <IonLabel className="ion-justify-content-between post-header">
+                        {item['type'] == 'like'? 
+                        <p>
+                          {item['username']} <b> liked</b> your post.
+                        </p>
+                        : 
+                        <p>
+                          {item['username']} commented<b> {item['comment']}</b> your post.
+                        </p>
+                        }
+                        </IonLabel>
+                        <IonAvatar slot="end">
+                        {item["media_type"] == "mp4" ||
+                                  item["media_type"] == "avi" ||
+                                  item["media_type"] == "flv" ||
+                                  item["media_type"] == "3gp" ||
+                                  item["media_type"] == "mkv" ? (
+                                   <IonIcon icon={videocamOutline}></IonIcon>
+                                ) : item["media_type"] == "mp3" ? (
+                                  <IonIcon icon={musicalNoteOutline}></IonIcon>
+                                ) : (
+                                  <img alt='post' src={item["media"]} />
+                                )}
+                    </IonAvatar>
+                      </IonItem>
+                    </IonCard>
+                    :''
+                  )) : ''}
+              </IonItemGroup> :''}
+              {OlderNotify.length > 0 ?
+              <IonItemGroup>
+              <IonItemDivider >
+                  <IonLabel >Older</IonLabel>
+              </IonItemDivider>
+              {OlderNotify.length > 0 ? OlderNotify.map((item: any, index) => (
+                item['user_by'] != loggedInData.id ? 
+
+                    <IonCard key={index}>
+                      <IonItem routerLink={"/singlepost/"+item['post_id']} lines="none">
+                      <IonAvatar slot="start">
+                        <img alt='avatar' src={item['profile'] ? item['profile']: "/assets/images/user.png"}/>
+                    </IonAvatar>
+                        <IonLabel className="ion-justify-content-between post-header">
+                        {item['type'] == 'like'? 
+                        <p>
+                          {item['username']} <b> liked</b> your post.
+                        </p>
+                        : 
+                        <p>
+                          {item['username']} commented<b> {item['comment']}</b> your post.
+                        </p>
+                        }
+                        </IonLabel>
+                        <IonAvatar slot="end">
+                        {item["media_type"] == "mp4" ||
+                                  item["media_type"] == "avi" ||
+                                  item["media_type"] == "flv" ||
+                                  item["media_type"] == "3gp" ||
+                                  item["media_type"] == "mkv" ? (
+                                  <IonIcon icon={videocamOutline}></IonIcon>
+                                ) : item["media_type"] == "mp3" ? (
+                                  <IonIcon icon={musicalNoteOutline}></IonIcon>
+                                ) : (
+                                  <img alt='post' src={item["media"]} />
+                                )}
+                    </IonAvatar>
+                      </IonItem>
+                    </IonCard>
+                    :''
+                  )) : ''}
+              </IonItemGroup> :''}
             </section>
           </IonContent>
         </IonPage>

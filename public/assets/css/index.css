@@ -136,6 +136,7 @@ body {
   margin-bottom: 20px;
   color: black;
 }
+
 .filter-buttons .active-view {
   color:white;
   background: var(--ion-color-primary, #3880ff)
@@ -151,10 +152,16 @@ body {
   cursor: pointer;
   border-radius: 3px;
 }
+
 .post-img img, .post-img video, .post-img audio{
-  width: 320px;
-  height: 240px;
+  object-position: center;
+  min-height: 240px;
+  max-height: 240px;
+  object-fit: contain;
+  display: block;
+  width: 100%;
 }
+
 .list a {
   text-decoration: none;
   cursor: pointer;
@@ -167,7 +174,7 @@ body {
 }
 
 .list-view-button {
-  margin-right: 10px;
+  margin-left: 10px;
 }
 
 .list {
@@ -175,16 +182,16 @@ body {
   margin: 0;
   padding: 0;
   display: flex;
+  width: 100%;
 }
 
-li {
+/* li {
   background-color: #1f364d;
   color: white;
   border-radius: 3px;
   margin-bottom: 10px;
   transition: 0.3s;
-}
-
+} */
 
 .list.list-view-filter {
   flex-direction: column;
@@ -203,4 +210,29 @@ li {
   padding: 100px;
   margin-right: 10px;
   text-align: center;
+}
+ion-textarea {
+  max-height: 100px;
+  max-width: 300px;
+}
+.grid-view-filter .action-wrap, .grid-view-filter .item-top, .grid-view-filter .post-img-top p {
+  display: none;
+}
+.grid-view-filter a ion-card-content {
+  padding: 0;
+}
+.list ion-card {
+  max-width: 300px;
+  min-width: 300px;
+}
+.post-img-top {
+  width: 100%;
+}
+
+
+@media(max-width:767px) {
+  .list ion-card {
+    max-width: 100%;
+    min-width: 100%;
+}
 }

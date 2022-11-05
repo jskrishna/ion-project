@@ -1,6 +1,7 @@
 import {
   IonAlert,
   IonAvatar,
+  IonBackButton,
   IonButton,
   IonButtons,
   IonCard,
@@ -20,6 +21,8 @@ import {
   IonPage,
   IonPopover,
   IonRow,
+  IonSegment,
+  IonSegmentButton,
   IonTextarea,
   IonTitle,
   IonToolbar,
@@ -33,8 +36,10 @@ import {
   chatbubbleSharp,
   createOutline,
   ellipsisVertical,
+  grid,
   heartOutline,
   heartSharp,
+  list,
   shareSocial,
 } from "ionicons/icons";
 import { useRef, useState } from "react";
@@ -101,8 +106,6 @@ const Profile: React.FC = () => {
     getloggedindata();
     setShowLoading(true);
     getPostdata();
-  history.location.hash.includes('list')? setListview(true): setListview(false);
-  console.log(history.location);
   });
 
   const [values, setValues] = useState({
@@ -259,12 +262,23 @@ const gridViewButton = () => {
       });
 };
 
+  // const handleAnchor = (e:any) => {
+  //  	e.preventDefault();
+  // }
+
   return (
     <>
       <SideNav />
       <IonPage id="main-content">
         <IonHeader no-border>
           <IonToolbar>
+            <IonButtons slot="start">
+              {
+                isListview ? 
+                <IonBackButton defaultHref="/profile" />
+                : ''
+              }
+            </IonButtons>
             <IonTitle>Profile</IonTitle>
             <IonButtons slot="end">
               <IonMenuButton></IonMenuButton>
@@ -290,7 +304,7 @@ const gridViewButton = () => {
           class="ion-padding custom-content"
           scrollEvents={true}
           onIonScrollStart={() => {}}
-          onIonScroll={() => {}}
+         onIonScroll={() => {}}
           onIonScrollEnd={() => {}}
         >
           <section>
@@ -331,9 +345,9 @@ const gridViewButton = () => {
                           </IonButton>
                         </div>
                         <div>
-                          <IonButton>
+                          <IonButton id="edit-modal">
                             <IonIcon icon={createOutline} />
-                            <IonLabel id="edit-modal">Edit Profile</IonLabel>
+                            <IonLabel>Edit Profile</IonLabel>
                           </IonButton>
                         </div>
                       </div>
@@ -401,41 +415,21 @@ const gridViewButton = () => {
                     Update
                   </IonButton>
                 </IonContent>
-              </IonModal>
+              </IonModal>   
               {/* modal end  */}
-              <div className="filter-buttons">
-                <div
-                  className={
-                    !isListview
-                      ? "active-view grid-view-button"
-                      : "grid-view-button"
-                  }
-                  onClick={gridViewButton}
-                >
-                  <i className="fa fa-th-large" aria-hidden="true"></i> Grid
-                  view
-                </div>
-                <div
-                  className={
-                    isListview
-                      ? "active-view list-view-button"
-                      : "list-view-button"
-                  }
-                  onClick={listViewButton}
-                >
-                  <i className="fa fa-bars" aria-hidden="true"></i> List view
-                </div>
-              </div>
-              <IonGrid
-                className={
-                  isListview ? "list list-view-filter" : "list grid-view-filter"
-                }
-                fixed={true}
-              >
+              <IonSegment value="buttons" className="filter-buttons">
+                <IonSegmentButton className={!isListview ? 'active-view grid-view-button' : 'grid-view-button'} onClick={gridViewButton}>
+                  <IonIcon icon={grid} ></IonIcon>
+                </IonSegmentButton>
+                <IonSegmentButton className={isListview ? 'active-view list-view-button' : 'list-view-button'} onClick={listViewButton}>
+                <IonIcon icon={list} ></IonIcon>
+                </IonSegmentButton>
+              </IonSegment>
+              <IonGrid className={isListview ? 'list list-view-filter' : 'list grid-view-filter'} fixed={true}>
                 {postdata.map((item: any, index) => (
                   <IonCard key={index}>
-                    <IonItem lines="none">
-                      <IonLabel className="ion-justify-content-between post-header">
+                    <IonItem lines="none" className="item-top">
+                      <IonLabel className="ion-justify-content-between">
                         <div className="ion-inline">
                           <div>
                             <h3>
@@ -507,41 +501,36 @@ const gridViewButton = () => {
                         </div>
                       </IonLabel>
                     </IonItem>
+                    <a key={index} id={'post'+item['id']} href={'profile/#post'+item['id']}>
 
-                    <IonCardContent onClick={listViewButton}>
-                      <div className="post-detail-wrap">
-                        <IonItem className="ion-no-padding" lines="none">
-                          <div className="">
-                            <p className="post-caption">
-                              {ReadyArray.includes(index)
-                                ? item["caption"]
-                                : item["caption"].substring(0, 40)}
-                              {item["caption"].length > 40 ? (
-                                <span
-                                  className="readmore"
-                                  onClick={() => handleClick(index)}
-                                >
-                                  {ReadyArray.includes(index)
-                                    ? " Show less"
-                                    : " Read more"}
-                                </span>
-                              ) : (
-                                ""
-                              )}
-                            </p>
-                            <a
-                              key={index}
-                              id={"post" + index}
-                              //  href={isListview ? 'Javascript:void(0)' : 'profile/#post'+index}
-                              href={"profile/#post" + index}
-                            >
+                      <IonCardContent onClick={listViewButton}>
+                        <div className="post-detail-wrap">
+                          <IonItem className="ion-no-padding" lines="none">
+                            <div className="post-img-top">
+                              <p>
+                                {ReadyArray.includes(index)
+                                  ? item["caption"]
+                                  : item["caption"].substring(0, 40)}
+                                {item["caption"].length > 40 ? (
+                                  <span
+                                    className="readmore"
+                                    onClick={() => handleClick(index)}
+                                  >
+                                    {ReadyArray.includes(index)
+                                      ? " Show less"
+                                      : " Read more"}
+                                  </span>
+                                ) : (
+                                  ""
+                                )}
+                              </p>
                               <div className="post-img">
                                 {item["media_type"] == "mp4" ||
-                                item["media_type"] == "avi" ||
-                                item["media_type"] == "flv" ||
-                                item["media_type"] == "3gp" ||
-                                item["media_type"] == "mkv" ? (
-                                  <video width="320" height="240" controls>
+                                  item["media_type"] == "avi" ||
+                                  item["media_type"] == "flv" ||
+                                  item["media_type"] == "3gp" ||
+                                  item["media_type"] == "mkv" ? (
+                                  <video controls>
                                     <source
                                       src={item["media"]}
                                       type="video/mp4"
@@ -561,110 +550,111 @@ const gridViewButton = () => {
                                   <img src={item["media"]} alt="" />
                                 )}
                               </div>
-                            </a>
-                          </div>
-                        </IonItem>
-                      </div>
-                      <div className="action-wrap post-footer">
-                        <IonGrid>
-                          <IonRow>
-                            <IonCol col-3 className="ion-no-padding">
-                              <IonButton
-                                onClick={(e) =>
-                                  handleLike(
-                                    loggedInData.id,
-                                    item["id"],
-                                    loggedInData.id
-                                  )
-                                }
-                                expand="block"
-                                fill="clear"
-                              >
-                                <IonIcon
-                                  icon={
-                                    item["likeBy"].includes(loggedInData.id)
-                                      ? heartSharp
-                                      : heartOutline
+                            </div>
+                          </IonItem>
+                        </div>
+                        <div className="action-wrap">
+                          <IonGrid>
+                            <IonRow>
+                              <IonCol col-3 className="ion-no-padding">
+                                <IonButton
+                                  onClick={(e) =>
+                                    handleLike(
+                                      item['user_id'],
+                                      item["id"],
+                                      loggedInData.id
+                                    )
                                   }
-                                />
-                              </IonButton>
-                            </IonCol>
-                            <IonCol col-3 className="ion-no-padding">
-                              <IonButton expand="block" fill="clear">
-                                <IonIcon icon={chatbubbleSharp} />
-                              </IonButton>
-                            </IonCol>
-                            <IonCol col-3 className="ion-no-padding">
-                              <IonButton expand="block"
-                          onClick={(e) => sharing('http://localhost:8100/profile/'+loggedInData.username+'/#list/#post'+index)}
-                              fill="clear">
-                                <IonIcon icon={shareSocial} />
-                              </IonButton>
-                            </IonCol>
-                          </IonRow>
-                          {item["like_count"] == 2 ? (
-                            <p>
-                              Liked by{" "}
-                              {
-                                <span>
-                                  <b>{item["like"][0].username}</b>
-                                  &nbsp;and&nbsp;
-                                  <b>{item["like"][1].username}</b>
-                                </span>
-                              }
-                            </p>
-                          ) : item["like_count"] == 0 ? (
-                            ""
-                          ) : item["like_count"] == 1 ? (
-                            <p>
-                              Liked by{" "}
-                              {
-                                <span>
-                                  <b>{item["like"][0].username}</b>
-                                </span>
-                              }
-                            </p>
-                          ) : item["like_count"] > 2 ? (
-                            <p>
-                              Liked by{" "}
-                              {
-                                <span>
-                                  <b>{item["like"][0].username}</b>
-                                  &nbsp;and&nbsp;
-                                  <b>{item["like_count"] - 1} others</b>
-                                </span>
-                              }
-                            </p>
-                          ) : (
-                            ""
-                          )}
-
-                          <div className="comments">
-                            <span>
-                              {item["comment_count"] == 0
-                                ? ""
-                                : item["comment_count"] == 1
-                                ? "View comment"
-                                : item["comment_count"] > 1
-                                ? "view all " +
-                                  item["comment_count"] +
-                                  " comments"
-                                : ""}
-                            </span>
-                            {item["comment_count"] > 0 ? (
-                              <span>
-                                <p>
-                                  <b> {item["comment"][0].username}</b>{" "}
-                                  {item["comment"][0].comment}
-                                </p>
-                              </span>
+                                  expand="block"
+                                  fill="clear"
+                                >
+                                  <IonIcon
+                                    icon={
+                                      item["likeBy"].includes(loggedInData.id)
+                                        ? heartSharp
+                                        : heartOutline
+                                    }
+                                  />
+                                </IonButton>
+                              </IonCol>
+                              <IonCol col-3 className="ion-no-padding">
+                                <IonButton expand="block" fill="clear">
+                                  <IonIcon icon={chatbubbleSharp} />
+                                </IonButton>
+                              </IonCol>
+                              <IonCol col-3 className="ion-no-padding">
+                                <IonButton expand="block" 
+                            onClick={(e) => 
+                              sharing('http://localhost:8100/singlepost/'+item['id'])}
+                                fill="clear">
+                                  <IonIcon icon={shareSocial} />
+                                </IonButton>
+                              </IonCol>
+                            </IonRow>
+                            {item["like_count"] == 2 ? (
+                              <p>
+                                Liked by{" "}
+                                {
+                                  <span>
+                                    <b>{item["like"][0].username}</b>
+                                    &nbsp;and&nbsp;
+                                    <b>{item["like"][1].username}</b>
+                                  </span>
+                                }
+                              </p>
+                            ) : item["like_count"] == 0 ? (
+                              ""
+                            ) : item["like_count"] == 1 ? (
+                              <p>
+                                Liked by{" "}
+                                {
+                                  <span>
+                                    <b>{item["like"][0].username}</b>
+                                  </span>
+                                }
+                              </p>
+                            ) : item["like_count"] > 2 ? (
+                              <p>
+                                Liked by{" "}
+                                {
+                                  <span>
+                                    <b>{item["like"][0].username}</b>
+                                    &nbsp;and&nbsp;
+                                    <b>{item["like_count"] - 1} others</b>
+                                  </span>
+                                }
+                              </p>
                             ) : (
                               ""
                             )}
-                          </div>
-                        </IonGrid>
-                      </div>
-                    </IonCardContent>
+
+                            <div className="comments">
+                              <span>
+                                {item["comment_count"] == 0
+                                  ? ""
+                                  : item["comment_count"] == 1
+                                    ? "View comment"
+                                    : item["comment_count"] > 1
+                                      ? "view all " +
+                                      item["comment_count"] +
+                                      " comments"
+                                      : ""}
+                              </span>
+                              {item["comment_count"] > 0 ? (
+                                <span>
+                                  <p>
+                                    <b> {item["comment"][0].username}</b>{" "}
+                                    {item["comment"][0].comment}
+                                  </p>
+                                </span>
+                              ) : (
+                                ""
+                              )}
+                            </div>
+                          </IonGrid>
+                        </div>
+                      </IonCardContent>
+                    </a>
                   </IonCard>
                 ))}
               </IonGrid>
