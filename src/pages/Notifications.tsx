@@ -1,6 +1,7 @@
 import {
     IonAlert,
     IonAvatar,
+    IonBackButton,
     IonButton,
     IonButtons,
     IonCard,
@@ -17,16 +18,19 @@ import {
     IonMenuButton,
     IonPage,
     IonPopover,
+    IonRefresher,
+    IonRefresherContent,
     IonRouterLink,
     IonTitle,
     IonToolbar,
+    RefresherEventDetail,
     useIonAlert,
     useIonViewDidEnter,
     useIonViewWillEnter,
   } from "@ionic/react";
   import axios from "axios";
   import {
-    ellipsisVertical, musicalNoteOutline, videocamOutline,
+    ellipsisVertical, musicalNoteOutline, settingsOutline, videocamOutline,
   } from "ionicons/icons";
   import { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
@@ -68,6 +72,17 @@ import { useHistory } from "react-router-dom";
           setShowLoading(false);
         });
     };
+
+
+    function doRefresh(event: CustomEvent<RefresherEventDetail>) {
+      // console.log('Begin async operation');
+      getNotify()
+      setTimeout(() => {
+        // console.log('Async operation has ended');
+        event.detail.complete();
+      }, 2000);
+    }
+
     useIonViewWillEnter(() => {
     });
 
@@ -86,9 +101,15 @@ import { useHistory } from "react-router-dom";
         <IonPage id="main-content">
           <IonHeader no-border>
             <IonToolbar>
+            <IonButtons slot="start">
+              <IonBackButton />
+            </IonButtons>
               <IonTitle>Notifications</IonTitle>
               <IonButtons slot="end">
-                <IonMenuButton></IonMenuButton>
+                <IonMenuButton>
+              <IonIcon icon={settingsOutline}></IonIcon>
+
+                </IonMenuButton>
               </IonButtons>
             </IonToolbar>
           </IonHeader>
@@ -114,36 +135,46 @@ import { useHistory } from "react-router-dom";
             onIonScroll={() => {}}
             onIonScrollEnd={() => {}}
           >
+            <IonRefresher slot="fixed" onIonRefresh={doRefresh} pullFactor={0.5} pullMin={100} pullMax={200}>
+            <IonRefresherContent></IonRefresherContent>
+          </IonRefresher>
             <section>
             {TodayNotify.length > 0 ?
               <IonItemGroup>
               <IonItemDivider>
                   <IonLabel>Today</IonLabel>
               </IonItemDivider>
-              {TodayNotify.length > 0 ? TodayNotify.map((item: any, index) => (
+              {TodayNotify.length > 0 ? TodayNotify.sort((a:any, b:any) => b.id - a.id).map((item: any, index) => (
 
                 item['user_by'] != loggedInData.id ? 
                     <IonCard key={index}>
-                      <IonItem routerLink={"/singlepost/"+item['post_id']} lines="none">
+                      <IonItem routerLink={item['type'] == 'follow' ? '/user/'+ item['username']:"/singlepost/"+item['post_id']} lines="none">
                       <IonAvatar slot="start">
                         <img alt='avatar' src={item['profile'] ? item['profile']: "/assets/images/user.png"}/>
                     </IonAvatar>
                         <IonLabel className="ion-justify-content-between post-header">
                           {item['type'] == 'like'? 
                         <p>
-                          {item['username']} <b> liked</b> your post.
+                          <b> {item['username']}</b> liked your post.
                         </p>
                         : 
-                        <p>
-                          {item['username']} commented<b> {item['comment']}</b> your post.
-                        </p>
+                       (item['type'] == 'follow' ?
+                       <p>
+                        <b> {item['username']} Follow you</b>.
+                       </p>
+                       :
+                       <p>
+                      <b>{item['username']}</b> commented<b> {item['comment']}</b> your post.
+                     </p>
+                       )
                         }
                         {
                             <p>{human(new Date(item['created_at']))}</p>
                         }
                         </IonLabel>
                         <IonAvatar slot="end">
-                        {item["media_type"] == "mp4" ||
+                        {item["media_type"] ?
+                        item["media_type"] == "mp4" ||
                                   item["media_type"] == "avi" ||
                                   item["media_type"] == "flv" ||
                                   item["media_type"] == "3gp" ||
@@ -153,8 +184,18 @@ import { useHistory } from "react-router-dom";
                                   <IonIcon icon={musicalNoteOutline}></IonIcon>
                                 ) : (
                                   <img alt='post' src={item["media"]} />
-                                )}
+                                ) : ''
+                              }
                     </IonAvatar>
+                    {
+                      item['type'] == 'follow' ? 
+                      <div>
+                        <IonButton>
+                          <IonLabel>Follow Back</IonLabel>
+                        </IonButton>
+                    </div>
+                      :''
+                    }
                       </IonItem>
                     </IonCard>
                       : ''
@@ -168,38 +209,59 @@ import { useHistory } from "react-router-dom";
                   <IonLabel>Yesterday</IonLabel>
                   
               </IonItemDivider>
-              {YesNotify.length > 0 ? YesNotify.map((item: any, index) => (
+              {YesNotify.length > 0 ? YesNotify.sort((a:any, b:any) => b.id - a.id).map((item: any, index) => (
                 item['user_by'] != loggedInData.id ? 
                     
                     <IonCard key={index}>
-                      <IonItem routerLink={"/singlepost/"+item['post_id']} lines="none">
+                      <IonItem routerLink={item['type'] == 'follow' ? '/user/'+ item['username']:"/singlepost/"+item['post_id']} lines="none">
+
                       <IonAvatar slot="start">
                         <img alt='avatar' src={item['profile'] ? item['profile']: "/assets/images/user.png"}/>
                     </IonAvatar>
-                        <IonLabel className="ion-justify-content-between post-header">
-                        {item['type'] == 'like'? 
+                    <IonLabel className="ion-justify-content-between post-header">
+                          {item['type'] == 'like'? 
                         <p>
-                          {item['username']} <b> liked</b> your post.
+                          <b> {item['username']}</b> liked your post.
                         </p>
                         : 
-                        <p>
-                          {item['username']} commented<b> {item['comment']}</b> your post.
-                        </p>
+                       (item['type'] == 'follow' ?
+                       <p>
+                        <b> {item['username']} Follow you</b>.
+                       </p>
+                       :
+                       <p>
+                      <b>{item['username']}</b> commented<b> {item['comment']}</b> your post.
+                     </p>
+                       )
+                        }
+                        {
+                            <p>{human(new Date(item['created_at']))}</p>
                         }
                         </IonLabel>
                         <IonAvatar slot="end">
-                        {item["media_type"] == "mp4" ||
+                        {item["media_type"] ?
+                        item["media_type"] == "mp4" ||
                                   item["media_type"] == "avi" ||
                                   item["media_type"] == "flv" ||
                                   item["media_type"] == "3gp" ||
                                   item["media_type"] == "mkv" ? (
-                                   <IonIcon icon={videocamOutline}></IonIcon>
+                                  <IonIcon icon={videocamOutline}></IonIcon>
                                 ) : item["media_type"] == "mp3" ? (
                                   <IonIcon icon={musicalNoteOutline}></IonIcon>
                                 ) : (
                                   <img alt='post' src={item["media"]} />
-                                )}
+                                ) : ''
+                              }
                     </IonAvatar>
+                    {
+                      item['type'] == 'follow' ? 
+                      <div>
+                        <IonButton>
+                          <IonLabel>Follow Back</IonLabel>
+                        </IonButton>
+                    </div>
+                      :''
+                    }
                       </IonItem>
                     </IonCard>
                     :''
@@ -210,27 +272,37 @@ import { useHistory } from "react-router-dom";
               <IonItemDivider >
                   <IonLabel >Older</IonLabel>
               </IonItemDivider>
-              {OlderNotify.length > 0 ? OlderNotify.map((item: any, index) => (
+              {OlderNotify.length > 0 ? OlderNotify.sort((a:any, b:any) => b.id - a.id).map((item: any, index) => (
                 item['user_by'] != loggedInData.id ? 
 
                     <IonCard key={index}>
-                      <IonItem routerLink={"/singlepost/"+item['post_id']} lines="none">
+                      <IonItem routerLink={item['type'] == 'follow' ? '/user/'+ item['username']:"/singlepost/"+item['post_id']} lines="none">
                       <IonAvatar slot="start">
                         <img alt='avatar' src={item['profile'] ? item['profile']: "/assets/images/user.png"}/>
                     </IonAvatar>
-                        <IonLabel className="ion-justify-content-between post-header">
-                        {item['type'] == 'like'? 
+                    <IonLabel className="ion-justify-content-between post-header">
+                          {item['type'] == 'like'? 
                         <p>
-                          {item['username']} <b> liked</b> your post.
+                          <b> {item['username']}</b> liked your post.
                         </p>
                         : 
-                        <p>
-                          {item['username']} commented<b> {item['comment']}</b> your post.
-                        </p>
+                       (item['type'] == 'follow' ?
+                       <p>
+                        <b> {item['username']} Follow you</b>.
+                       </p>
+                       :
+                       <p>
+                      <b>{item['username']}</b> commented<b> {item['comment']}</b> your post.
+                     </p>
+                       )
+                        }
+                        {
+                            <p>{human(new Date(item['created_at']))}</p>
                         }
                         </IonLabel>
                         <IonAvatar slot="end">
-                        {item["media_type"] == "mp4" ||
+                        {item["media_type"] ?
+                        item["media_type"] == "mp4" ||
                                   item["media_type"] == "avi" ||
                                   item["media_type"] == "flv" ||
                                   item["media_type"] == "3gp" ||
@@ -240,8 +312,18 @@ import { useHistory } from "react-router-dom";
                                   <IonIcon icon={musicalNoteOutline}></IonIcon>
                                 ) : (
                                   <img alt='post' src={item["media"]} />
-                                )}
+                                ) : ''
+                              }
                     </IonAvatar>
+                    {
+                      item['type'] == 'follow' ? 
+                      <div>
+                        <IonButton>
+                          <IonLabel>Follow Back</IonLabel>
+                        </IonButton>
+                    </div>
+                      :''
+                    }
                       </IonItem>
                     </IonCard>
                     :''

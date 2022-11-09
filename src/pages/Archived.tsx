@@ -1,5 +1,6 @@
 import {
     IonAlert,
+    IonBackButton,
     IonButtons,
     IonCard,
     IonCardContent,
@@ -21,7 +22,7 @@ import {
   } from "@ionic/react";
   import axios from "axios";
   import {
-    ellipsisVertical,
+    ellipsisVertical, settingsOutline,
   } from "ionicons/icons";
   import { useState } from "react";
   import SideNav from "../components/common/sidenav";
@@ -124,9 +125,15 @@ import {
         <IonPage id="main-content">
           <IonHeader no-border>
             <IonToolbar>
+            <IonButtons slot="start">
+              <IonBackButton />
+            </IonButtons>
               <IonTitle>Archived Posts</IonTitle>
               <IonButtons slot="end">
-                <IonMenuButton></IonMenuButton>
+                <IonMenuButton>
+              <IonIcon icon={settingsOutline}></IonIcon>
+
+                </IonMenuButton>
               </IonButtons>
             </IonToolbar>
           </IonHeader>

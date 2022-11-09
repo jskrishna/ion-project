@@ -1,4 +1,4 @@
-import { IonButtons, IonCard, IonCol, IonContent, IonGrid, IonHeader, IonMenuButton, IonPage, IonRow, IonSearchbar, IonTitle, IonToolbar } from '@ionic/react';
+import { IonBackButton, IonButtons, IonCard, IonCol, IonContent, IonGrid, IonHeader, IonMenuButton, IonPage, IonRow, IonSearchbar, IonTitle, IonToolbar } from '@ionic/react';
 import SideNav from '../components/common/sidenav';
 import './DoctorList.css';
 
@@ -9,6 +9,9 @@ const Tab2: React.FC = () => {
       <IonPage id="main-content">
         <IonHeader no-border>
           <IonToolbar>
+          <IonButtons slot="start">
+              <IonBackButton />
+            </IonButtons>
             <IonTitle>Doctors</IonTitle>
             <IonButtons slot="end">
               <IonMenuButton></IonMenuButton>

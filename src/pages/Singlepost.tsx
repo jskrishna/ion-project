@@ -30,7 +30,7 @@ import {
   import axios from "axios";
   import {
       chatbubbleSharp,
-    ellipsisVertical, heartOutline, heartSharp, musicalNoteOutline, shareSocial, videocamOutline,
+    ellipsisVertical, heartOutline, heartSharp, musicalNoteOutline, settingsOutline, shareSocial, videocamOutline,
   } from "ionicons/icons";
   import { useEffect, useState } from "react";
   import SideNav from "../components/common/sidenav";
@@ -165,7 +165,10 @@ useEffect(()=>{
                 <IonBackButton></IonBackButton>
                 </IonButtons>
               <IonButtons slot="end">
-                <IonMenuButton></IonMenuButton>
+                <IonMenuButton>
+              <IonIcon icon={settingsOutline}></IonIcon>
+
+                </IonMenuButton>
               </IonButtons>
             </IonToolbar>
           </IonHeader>

@@ -1,4 +1,4 @@
-import { IonAlert, IonButton, IonButtons, IonCard, IonCol, IonContent, IonGrid, IonHeader, IonInput, IonItem, IonLabel, IonLoading, IonMenuButton, IonPage, IonRow, IonSearchbar, IonTextarea, IonTitle, IonToast, IonToolbar } from '@ionic/react';
+import { IonAlert, IonBackButton, IonButton, IonButtons, IonCard, IonCol, IonContent, IonGrid, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonLoading, IonMenuButton, IonPage, IonRow, IonSearchbar, IonTextarea, IonTitle, IonToast, IonToolbar } from '@ionic/react';
 import axios from 'axios';
 import { config } from 'process';
 import { useState, useRef } from 'react';
@@ -6,6 +6,7 @@ import SideNav from '../components/common/sidenav';
 import Constent from '../components/Constent';
 import './DoctorList.css';
 import { useHistory } from "react-router-dom";
+import { settingsOutline } from 'ionicons/icons';
 
 interface MultipleValues {
     fileOne: any;
@@ -74,9 +75,15 @@ const NewPost: React.FC = () => {
       <IonPage id="main-content">
         <IonHeader no-border>
           <IonToolbar>
+          <IonButtons slot="start">
+              <IonBackButton />
+            </IonButtons>
             <IonTitle>New Post</IonTitle>
             <IonButtons slot="end">
-              <IonMenuButton></IonMenuButton>
+              <IonMenuButton>
+              <IonIcon icon={settingsOutline}></IonIcon>
+
+              </IonMenuButton>
             </IonButtons>
           </IonToolbar>
         </IonHeader>

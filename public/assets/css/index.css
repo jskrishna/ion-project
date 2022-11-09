@@ -224,15 +224,49 @@ ion-textarea {
 .list ion-card {
   max-width: 300px;
   min-width: 300px;
+  margin: 10px;
 }
 .post-img-top {
   width: 100%;
 }
-
+.follower-dtl {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+.profile-top-wrap ion-avatar.md {
+  min-width: 100px;
+    height: 100%;
+    margin-right: 20px;
+    max-height: 100px;
+}
+.follower-dtl {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+.profile-top-wrap ion-avatar.md img {
+  max-height: 100px;
+  height: 100%;
+  border-radius: 50%;
+  margin-right: 20px;
+  width: 100%;
+  object-position: top;
+}
+.follower-dtl > div {
+  text-align: center;
+}
+.follower-dtl  h4 {
+  margin-bottom: 0;
+}
+.follower-dtl p {
+  margin-top: 0;
+}
 
 @media(max-width:767px) {
   .list ion-card {
     max-width: 100%;
     min-width: 100%;
+    margin: 10px 0;
 }
 }

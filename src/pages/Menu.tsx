@@ -3,12 +3,14 @@ import {
   IonButtons,
   IonContent,
   IonHeader,
+  IonIcon,
   IonMenu,
   IonMenuButton,
   IonPage,
   IonTitle,
   IonToolbar
 } from '@ionic/react';
+import { settingsOutline } from 'ionicons/icons';
 const Menu: React.FC = () => {
   return (
     <>
@@ -24,7 +26,10 @@ const Menu: React.FC = () => {
         <IonHeader>
           <IonToolbar>
             <IonButtons slot="start">
-              <IonMenuButton></IonMenuButton>
+              <IonMenuButton>
+              <IonIcon icon={settingsOutline}></IonIcon>
+
+              </IonMenuButton>
             </IonButtons>
             <IonTitle>Menu</IonTitle>
           </IonToolbar>

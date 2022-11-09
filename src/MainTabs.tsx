@@ -9,7 +9,7 @@ import {
   IonLabel,
 } from "@ionic/react";
 import { Redirect, Route } from "react-router";
-import { addCircleOutline, heartOutline, homeOutline, homeSharp, personCircleSharp, personOutline, pulseOutline } from "ionicons/icons";
+import { addCircleOutline, heartOutline, homeOutline, homeSharp, personCircleSharp, personOutline, pulseOutline, searchOutline } from "ionicons/icons";
 import { IonReactRouter } from "@ionic/react-router";
 import Tab3 from "./pages/Profile";
 import Dashboard from "./pages/Dashboard";
@@ -19,6 +19,8 @@ import Archived from "./pages/Archived";
 import Notifications from "./pages/Notifications";
 import { useHistory } from "react-router";
 import Singlepost from "./pages/Singlepost";
+import SearchFeed from "./pages/SearchFeed";
+import User from "./pages/User";
 
 const MainTabs: React.FC = () => {
   const history = useHistory();
@@ -55,6 +57,12 @@ console.log(history.location.pathname);
            <Route path="/forgot-password">
            <Redirect to="/dashboard" />
            </Route>
+           <Route path="/search-feed/">
+             <SearchFeed />
+           </Route>
+           <Route path="/user/:username/">
+             <User />
+           </Route>
            <Route exact path="/">
              <Redirect to="/dashboard" />
            </Route>
@@ -70,6 +78,12 @@ console.log(history.location.pathname);
              <IonIcon icon={homeOutline} />
              {/* <IonLabel>Dashboard</IonLabel> */}
            </IonTabButton>
+
+           <IonTabButton tab="search-feed" href="/search-feed">
+             <IonIcon icon={searchOutline} />
+             {/* <IonLabel>New Post</IonLabel> */}
+           </IonTabButton>
+
            <IonTabButton tab="new-post" href="/new-post">
              <IonIcon icon={addCircleOutline} />
              {/* <IonLabel>New Post</IonLabel> */}

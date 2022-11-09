@@ -20,12 +20,15 @@ import {
   IonModal,
   IonPage,
   IonPopover,
+  IonRefresher,
+  IonRefresherContent,
   IonRow,
   IonSegment,
   IonSegmentButton,
   IonTextarea,
   IonTitle,
   IonToolbar,
+  RefresherEventDetail,
   useIonAlert,
   useIonViewDidEnter,
   useIonViewWillEnter,
@@ -40,6 +43,7 @@ import {
   heartOutline,
   heartSharp,
   list,
+  settingsOutline,
   shareSocial,
 } from "ionicons/icons";
 import { useRef, useState } from "react";
@@ -57,6 +61,17 @@ const Profile: React.FC = () => {
   function dismiss() {
     modal.current?.dismiss();
   }
+
+  const modalFollowing = useRef<HTMLIonModalElement>(null);
+  function dismissFollowing() {
+    modalFollowing.current?.dismiss();
+  }
+
+  const modalEdit = useRef<HTMLIonModalElement>(null);
+  function dismissEdit() {
+    modalEdit.current?.dismiss();
+  }
+
   const [iserror, setIserror] = useState<boolean>(false);
   const [message, setMessage] = useState<string>("");
   const [showLoading, setShowLoading] = useState(false);
@@ -81,8 +96,11 @@ const Profile: React.FC = () => {
       .then((res: any) => {
         localStorage.setItem("loggedInData", JSON.stringify(res.data.data));
         var mydata = res.data.data;
+        getFollowing(mydata.id);
+        getfollowers(mydata.id);
         setValues({ ...values, ...{ ["email"]: mydata.email } });
         setValues({ ...values, ...{ ["username"]: mydata.username } });
+        setValues({ ...values, ...{ ["fullname"]: mydata.fullname } });
         setValues({ ...values, ...{ ["mobile"]: mydata.mobile } });
         setValues({ ...values, ...{ ["profile"]: mydata.profile } });
         setValues({ ...values, ...{ ["bio"]: mydata.bio } });
@@ -111,10 +129,20 @@ const Profile: React.FC = () => {
   const [values, setValues] = useState({
     id: loggedInData.id,
     username: loggedInData.username,
+    fullname: loggedInData.fullname,
     email: loggedInData.email,
     bio: loggedInData.bio,
     mobile: loggedInData.mobile,
   });
+
+  function doRefresh(event: CustomEvent<RefresherEventDetail>) {
+    // console.log('Begin async operation');
+    getPostdata()
+    setTimeout(() => {
+      // console.log('Async operation has ended');
+      event.detail.complete();
+    }, 2000);
+  }
 
   const handleChange = (e: any, name: string) => {
     setValues({
@@ -126,8 +154,8 @@ const Profile: React.FC = () => {
     baseURL: Constent.BASE_URL,
   });
   const handleUpdate = () => {
-    if (!values.username) {
-      setMessage("Please enter a valid username");
+    if (!values.fullname) {
+      setMessage("Please enter a name");
       setIserror(true);
       return;
     }
@@ -223,6 +251,35 @@ const Profile: React.FC = () => {
       });
   };
 
+  const [following, setFollowing] = useState([]);
+
+  const getFollowing = (user_id:any) => {
+    api
+      .get(`/following/` + user_id)
+      .then((res: any) => {
+        console.log('following--',res.data.data);
+        setFollowing(res.data.data);
+      })
+      .catch((e) => {
+        console.log(e);
+      });
+  }
+
+
+  const [followers, setfollowers] = useState([]);
+
+  const getfollowers = (user_id:any) => {
+    api
+      .get(`/followers/` + user_id)
+      .then((res: any) => {
+        console.log('followers--',res.data.data);
+        setfollowers(res.data.data);
+      })
+      .catch((e) => {
+        console.log(e);
+      });
+  }
+
   const handledeletepost = (post_id: number) => {
     api
       .post(`/deletepost/` + post_id)
@@ -273,15 +330,14 @@ const gridViewButton = () => {
         <IonHeader no-border>
           <IonToolbar>
             <IonButtons slot="start">
-              {
-                isListview ? 
-                <IonBackButton defaultHref="/profile" />
-                : ''
-              }
+                <IonBackButton />
             </IonButtons>
             <IonTitle>Profile</IonTitle>
             <IonButtons slot="end">
-              <IonMenuButton></IonMenuButton>
+              <IonMenuButton>
+              <IonIcon icon={settingsOutline}></IonIcon>
+
+              </IonMenuButton>
             </IonButtons>
           </IonToolbar>
         </IonHeader>
@@ -307,6 +363,9 @@ const gridViewButton = () => {
          onIonScroll={() => {}}
           onIonScrollEnd={() => {}}
         >
+            <IonRefresher slot="fixed" onIonRefresh={doRefresh} pullFactor={0.5} pullMin={100} pullMax={200}>
+            <IonRefresherContent></IonRefresherContent>
+          </IonRefresher>
           <section>
             <div className="doctor-listing">
               <IonGrid class="ion-no-padding">
@@ -314,7 +373,7 @@ const gridViewButton = () => {
                   <IonCol>
                     <IonItem
                       lines="none"
-                      className="ion-justify-content-center"
+                      className="ion-justify-content-center profile-top-wrap"
                     >
                       <IonAvatar>
                         <img
@@ -327,10 +386,25 @@ const gridViewButton = () => {
                           alt=""
                         />
                       </IonAvatar>
+                      <div className="follower-dtl">
+                          <div className="tPost">
+                              <h4>{postdata.length}</h4>
+                              <p>Posts</p>
+                          </div>
+                          <div id="followers-modal" className="tFollower">
+                            <h4>{followers? followers.length : 0}</h4>
+                            <p>Followers</p>
+                          </div>
+                          <div id="following-modal" className="tFollowing">
+                            <h4>{following? following.length : 0}</h4>
+                            <p>Followings</p>
+                          </div>
+                      </div>
                     </IonItem>
                     <IonItem button lines="none">
                       <IonLabel>
                         <h1>{values ? values.username : ""}</h1>
+                        <h2>{values ? values.fullname : ""}</h2>
                         <h3>{values ? values.email : ""}</h3>
                         <h3>{values ? values.mobile : ""}</h3>
                         <p className="user-bio">{values ? values.bio : ""}</p>
@@ -357,12 +431,12 @@ const gridViewButton = () => {
               </IonGrid>
 
               {/* modal start  */}
-              <IonModal ref={modal} trigger="edit-modal">
+              <IonModal ref={modalEdit} trigger="edit-modal">
                 <IonHeader>
                   <IonToolbar>
                     <IonTitle>Edit Profile</IonTitle>
                     <IonButtons slot="end">
-                      <IonButton onClick={() => dismiss()}>Close</IonButton>
+                      <IonButton onClick={() => dismissEdit()}>Close</IonButton>
                     </IonButtons>
                   </IonToolbar>
                 </IonHeader>
@@ -371,9 +445,9 @@ const gridViewButton = () => {
                     <IonItem>
                       <IonLabel>Name :-</IonLabel>
                       <IonInput
-                        placeholder="Enter Name"
-                        onIonChange={(e) => handleChange(e, "username")}
-                        value={values ? values.username : ""}
+                        placeholder="Enter full Name"
+                        onIonChange={(e) => handleChange(e, "fullname")}
+                        value={values ? values.fullname : ""}
                       ></IonInput>
                     </IonItem>
 
@@ -660,6 +734,78 @@ const gridViewButton = () => {
               </IonGrid>
             </div>
           </section>
+          <IonModal ref={modal} trigger="followers-modal">
+                <IonHeader>
+                  <IonToolbar>
+                    <IonTitle>Followers</IonTitle>
+                    <IonButtons slot="end">
+                      <IonButton onClick={() => dismiss()}>Close</IonButton>
+                    </IonButtons>
+                  </IonToolbar>
+                </IonHeader>
+                <IonContent className="ion-padding">
+                  <IonList>
+                    {
+                      followers.map((item:any,index:any) => (
+                        <IonItem key={index}>
+                        <IonAvatar>
+                            <img
+                              text-center="true"
+                              src={
+                                item['profile']
+                                  ? item['profile']
+                                  : "/assets/images/user.png"
+                              }
+                              alt=""
+                            />
+                          </IonAvatar>
+                          <IonLabel>
+                            <h2>{item['username']}</h2>
+                            <p>follow you</p>
+                          </IonLabel>
+                        </IonItem>
+                      ))
+                    }
+                  </IonList>
+                </IonContent>
+              </IonModal>
+
+              {/* // following  */}
+              <IonModal ref={modalFollowing} trigger="following-modal">
+                <IonHeader>
+                  <IonToolbar>
+                    <IonTitle>following</IonTitle>
+                    <IonButtons slot="end">
+                      <IonButton onClick={() => dismissFollowing()}>Close</IonButton>
+                    </IonButtons>
+                  </IonToolbar>
+                </IonHeader>
+                <IonContent className="ion-padding">
+                  <IonList>
+                    {
+                      following.map((item:any,index:any) => (
+                        <IonItem key={index}>
+                        <IonAvatar>
+                            <img
+                              text-center="true"
+                              src={
+                                item['profile']
+                                  ? item['profile']
+                                  : "/assets/images/user.png"
+                              }
+                              alt=""
+                            />
+                          </IonAvatar>
+                          <IonLabel>
+                            <h2>{item['username']}</h2>
+                            <p>follow by you</p>
+                          </IonLabel>
+                        </IonItem>
+                      ))
+                    }
+                  </IonList>
+                </IonContent>
+              </IonModal>
         </IonContent>
       </IonPage>
     </>

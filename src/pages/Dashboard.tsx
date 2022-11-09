@@ -1,13 +1,16 @@
-import { IonAvatar, IonButton, IonButtons, IonCard, IonCardContent, IonCol, IonContent, IonGrid, IonHeader, IonIcon, IonImg, IonInfiniteScroll, IonInfiniteScrollContent,  IonItem, IonLabel, IonList, IonMenuButton, IonModal, IonPage, IonPopover, IonRefresher, IonRefresherContent, IonRow, IonSearchbar, IonThumbnail, IonTitle, IonToolbar, RefresherEventDetail, useIonViewWillEnter } from '@ionic/react';
-import { chatbubbles, ellipsisVertical, shareSocial, thumbsUp } from 'ionicons/icons';
+import { IonAvatar, IonBackButton, IonButton, IonButtons, IonCard, IonCardContent, IonCol, IonContent, IonGrid, IonHeader, IonIcon, IonImg, IonInfiniteScroll, IonInfiniteScrollContent,  IonItem, IonLabel, IonList, IonLoading, IonMenuButton, IonModal, IonPage, IonPopover, IonRefresher, IonRefresherContent, IonRow, IonSearchbar, IonThumbnail, IonTitle, IonToolbar, RefresherEventDetail, useIonViewWillEnter } from '@ionic/react';
+import { chatbubbles, chatbubbleSharp, ellipsisVertical, heartOutline, heartSharp, settingsOutline, shareSocial, thumbsUp } from 'ionicons/icons';
 import SideNav from '../components/common/sidenav';
 import './Dashboard.css';
 import { useEffect, useRef, useState } from 'react';
+import axios from "axios";
 import { Share } from '@capacitor/share';
+import Constent from "../components/Constent";
 
 const Dashboard: React.FC = () => {
   const modal = useRef<HTMLIonModalElement>(null);
   const page = useRef(null);
+  var human = require("human-time");
 
   const [presentingElement, setPresentingElement] = useState<HTMLElement | null>(null);
 
@@ -22,23 +25,22 @@ const Dashboard: React.FC = () => {
   // pull down refresh
   function doRefresh(event: CustomEvent<RefresherEventDetail>) {
     // console.log('Begin async operation');
+    getNewsFeed(loggedInData.id)
     setTimeout(() => {
       // console.log('Async operation has ended');
       event.detail.complete();
     }, 2000);
   }
 
-  const sharing = async () => {
+  const sharing = async (url:any) => {
     await Share.share({
-        title: 'See cool stuff',
-        text: 'Really awesome thing you need to see right meow',
-        url: 'http://ionicframework.com/',
-        dialogTitle: 'Share with buddies',
+        title: 'This post will be shared',
+        text: 'Really awesome post you need to see right now',
+        url: url,
+        dialogTitle: 'Share with Friends',
       });
 };
-
   // scroll down refresh
-  const [data, setData] = useState<string[]>([]);
   const [isInfiniteDisabled, setInfiniteDisabled] = useState(false);
   const [ReadyArray, setReadyArray] = useState<any>([]);
   const handleClick = (e: any) => {
@@ -49,30 +51,58 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  const pushData = () => {
-    const max = data.length + 20;
-    const min = max - 20;
-    const newData = [];
-    for (let i = min; i < max; i++) {
-      newData.push('Item' + i);
-    }
-    setData([
-      ...data,
-      ...newData
-    ]);
-  }
-  const loadData = (ev: any) => {
-    setTimeout(() => {
-      pushData();
-      ev.target.complete();
-      if (data.length === 1000) {
-        setInfiniteDisabled(true);
-      }
-    }, 500);
-  }
-  useIonViewWillEnter(() => {
-    pushData();
+  const api = axios.create({
+    baseURL: Constent.BASE_URL,
   });
+  var loggedInData: any = localStorage.getItem("loggedInData")
+  ? localStorage.getItem("loggedInData")
+  : null;
+loggedInData = JSON.parse(loggedInData);
+
+const [feedData, setFeedData] = useState([]);
+const [likeData, setlikeData] = useState<any>([]);
+const [commentData, setcommentData] = useState<any>([]);
+
+  const getNewsFeed = (user_id:any) => {
+    api
+      .get(`/newsfeed/` + user_id)
+      .then((res: any) => {
+        setFeedData(res.data.data);
+        setlikeData(res.data.like);
+        setcommentData(res.data.comment);
+        console.log('feed--',res.data.data);
+        console.log('like--',res.data.like);
+        console.log('comment--',res.data.comment);
+        setShowLoading(false);
+       
+      })
+      .catch((e) => {
+        console.log(e);
+      });
+  }
+
+  useIonViewWillEnter(() => {
+    // newsFeed
+    setShowLoading(true);
+    getNewsFeed(loggedInData.id);
+  });
+  const [showLoading, setShowLoading] = useState(false);
+
+  const handleLike = (user_id: any, post_id: any, user_by: any) => {
+    let formData = new FormData();
+    formData.append("user_id", user_id);
+    formData.append("post_id", post_id);
+    formData.append("user_by", user_by);
+    api
+      .post("/makeLike", formData)
+      .then((res: any) => {
+        console.log(res.data);
+        getNewsFeed(loggedInData.id);
+      })
+      .catch((e) => {
+        console.log(e);
+      });
+  };
 
   return (
     <>
@@ -80,12 +110,24 @@ const Dashboard: React.FC = () => {
       <IonPage id="main-content">
         <IonHeader no-border>
           <IonToolbar>
+          <IonButtons slot="start">
+              <IonBackButton />
+            </IonButtons>
             <IonTitle>Dashboard</IonTitle>
             <IonButtons slot="end">
-              <IonMenuButton></IonMenuButton>
+              <IonMenuButton>
+              <IonIcon icon={settingsOutline}></IonIcon>
+              </IonMenuButton>
             </IonButtons>
           </IonToolbar>
         </IonHeader>
+        <IonLoading
+          cssClass="custom-loading"
+          isOpen={showLoading}
+          onDidDismiss={() => setShowLoading(false)}
+          message={"Loading..."}
+          spinner="circles"
+        />
         <IonContent class="ion-padding custom-content" scrollEvents={true}
           onIonScrollStart={() => { }}
           onIonScroll={() => { }}
@@ -94,571 +136,175 @@ const Dashboard: React.FC = () => {
             <IonRefresherContent></IonRefresherContent>
           </IonRefresher>
           <section>
-            <IonToolbar className='no-padding'>
-              <IonSearchbar></IonSearchbar>
-            </IonToolbar>
             <div>
-              <IonCard>
-                <IonItem lines="none">
-                  <IonThumbnail slot="start">
-                    <img src='/assets/images/pk.png' alt="" />
-                  </IonThumbnail>
-                  <IonLabel className='ion-justify-content-between'>
-                    <div className='ion-inline'>
-                      <div>
-                        <h2>Pk</h2>
-                        <p>36 min ago</p>
-                      </div>
-                      <div>
-                        <IonIcon id="trigger1" icon={ellipsisVertical} />
-                        <IonPopover trigger="trigger1" size="auto">
-                          <IonContent class="ion-padding">Hello!</IonContent>
-                        </IonPopover>
-                      </div>
-                    </div>
-                  </IonLabel>
-                </IonItem>
-                <IonCardContent>
-                  <div className='post-detail-wrap'>
-                    <IonItem className='ion-no-padding' lines="none">
-                      <div className='' key={"1"}>
-                        <p>
-                          {ReadyArray.includes('1') ? "Keep close to Nature's heart and break clear away, once in awhile, and climb a mountain or spend a week in the woods. Wash your spirit clean" : `${`Keep close to Nature's heart and break clear away, once in awhile,
-                          and climb a mountain or spend a week in the woods. Wash your spirit clean`.substring(0, 40)}...`}
-                          <span className='readmore' onClick={() => handleClick("1")}>{ReadyArray.includes('1') ? " Show less" : " Read more"}</span></p>
-                        <div className='post-img' id="open-modal">
-                          <img src="https://images.ctfassets.net/hrltx12pl8hq/7yQR5uJhwEkRfjwMFJ7bUK/dc52a0913e8ff8b5c276177890eb0129/offset_comp_772626-opt.jpg?fit=fill&w=800&h=300" alt="" />
+            {feedData.map((item: any, index) => (
+            <IonCard key={item['id']}>
+                    <IonItem lines="none" className="">
+                      <IonLabel className="ion-justify-content-between">
+                        <div className="ion-inline">
+                          <div>
+                            <IonAvatar>
+                              <img src={item['profile']? item['profile'] : "/assets/images/user.png"} alt="profile" />
+                            </IonAvatar>
+                            <h3>
+                              <b>{item['username']}</b>
+                            </h3>
+                            <p>{human(new Date(item['created_at']))}</p>
+                          </div>
+                          <div>
+                          </div>
                         </div>
-                      </div>
+                      </IonLabel>
                     </IonItem>
-                  </div>
-                  <div className='action-wrap'>
-                    <IonGrid >
-                      <IonRow>
-                        <IonCol col-3 className='ion-no-padding'>
-                          <IonButton expand="block" fill='clear'>
-                            <IonIcon icon={thumbsUp} />
-                          </IonButton>
-                        </IonCol>
-                        <IonCol col-3 className='ion-no-padding'>
-                          <IonButton expand="block" fill='clear'>
-                            <IonIcon icon={chatbubbles} />
-                          </IonButton>
-                        </IonCol>
-                        <IonCol col-3 className='ion-no-padding'>
-                          <IonButton onClick={sharing} expand="block" fill='clear'>
-                            <IonIcon icon={shareSocial} />
-                          </IonButton>
-                        </IonCol>
-                      </IonRow>
-                    </IonGrid>
-                  </div>
-                </IonCardContent>
-              </IonCard>
-              <IonCard>
-                <IonItem lines="none">
-                  <IonThumbnail slot="start">
-                    <img src='/assets/images/pk.png' alt="" />
-                  </IonThumbnail>
-                  <IonLabel className='ion-justify-content-between'>
-                    <div className='ion-inline'>
-                      <div>
-                        <h2>Pk</h2>
-                        <p>36 min ago</p>
-                      </div>
-                      <div>
-                        <IonIcon id="trigger2" icon={ellipsisVertical} />
-                        <IonPopover trigger="trigger2" size="auto">
-                          <IonContent class="ion-padding">Hello!</IonContent>
-                        </IonPopover>
-                      </div>
-                    </div>
-                  </IonLabel>
-                </IonItem>
-                <IonCardContent>
-                  <div className='post-detail-wrap'>
-                  <IonItem className='ion-no-padding' lines="none">
-                      <div className='' key={"2"}>
-                        <p>
-                          {ReadyArray.includes('2') ? "Keep close to Nature's heart and break clear away, once in awhile, and climb a mountain or spend a week in the woods. Wash your spirit clean" : `${`Keep close to Nature's heart and break clear away, once in awhile,
-                          and climb a mountain or spend a week in the woods. Wash your spirit clean`.substring(0, 40)}...`}
-                          <span className='readmore' onClick={() => handleClick("2")}>{ReadyArray.includes('1') ? " Show less" : " Read more"}</span></p>
+                      <IonCardContent>
+                        <div className="post-detail-wrap">
+                          <IonItem className="ion-no-padding" lines="none">
+                            <div className="">
+                              <p>
+                                {item['caption']}
+                              </p>
+                              <div className="post-img">
+                                {item['media_type'] == "mp4" ||
+                                  item['media_type'] == "avi" ||
+                                  item['media_type'] == "flv" ||
+                                  item['media_type'] == "3gp" ||
+                                  item['media_type'] == "mkv" ? (
+                                  <video controls>
+                                    <source
+                                      src={item['media']}
+                                      type="video/mp4"
+                                    />
+                                    Your browser does not support the video tag.
+                                  </video>
+                                ) : item['media_type'] == "mp3" ? (
+                                  <audio controls>
+                                    <source
+                                      src={item['media']}
+                                      type="audio/mpeg"
+                                    />
+                                    Your browser does not support the audio
+                                    element.
+                                  </audio>
+                                ) : (
+                                  <img src={item['media']} alt="" />
+                                )}
+                              </div>
+                            </div>
+                          </IonItem>
+                        </div>
+                        <div className="wrap">
+                          <IonGrid>
+                            <IonRow>
+                              <IonCol col-3 className="ion-no-padding">
+                                <IonButton
+                                  onClick={(e) =>
+                                    handleLike(
+                                      item['user_id'],
+                                      item['id'],
+                                      loggedInData.id
+                                    )
+                                  }
+                                  expand="block"
+                                  fill="clear"
+                                >
+                                  <IonIcon
+                                    icon={
+                                      likeData[item['id']].some((el:any) => el.user_by === loggedInData.id)
+                                        ? heartSharp
+                                        : 
+                                        heartOutline
+                                    }
+                                  />
+                                </IonButton>
+                              </IonCol>
+                              <IonCol col-3 className="ion-no-padding">
+                                <IonButton expand="block" fill="clear">
+                                  <IonIcon icon={chatbubbleSharp} />
+                                </IonButton>
+                              </IonCol>
+                              <IonCol col-3 className="ion-no-padding">
+                                <IonButton expand="block" 
+                            onClick={(e) => sharing('http://localhost:8100/singlepost/'+item['id'])}
+                                fill="clear">
+                                  <IonIcon icon={shareSocial} />
+                                </IonButton>
+                              </IonCol>
+                            </IonRow>
+                            {
+                            likeData[item['id']] ?
+                            likeData[item['id']].length == 2 ? (
+                              <p>
+                                Liked by{" "}
+                                {
+                                  <span>
+                                    <b>{likeData[item['id']][0].username}</b>
+                                    &nbsp;and&nbsp;
+                                    <b>{likeData[item['id']][1].username}</b>
+                                  </span>
+                                }
+                              </p>
+                            ) : likeData[item['id']].length  == 0 ? (
+                              ""
+                            ) : likeData[item['id']].length  == 1 ? (
+                              <p>
+                                Liked by{" "}
+                                {
+                                  <span>
+                                    <b>{likeData[item['id']][0].username}</b>
+                                  </span>
+                                }
+                              </p>
+                            ) : likeData[item['id']].length  > 2 ? (
+                              <p>
+                                Liked by{" "}
+                                {
+                                  <span>
+                                    <b>{likeData[item['id']][0].username}</b>
+                                    &nbsp;and&nbsp;
+                                    <b>{likeData[item['id']].length  - 1} others</b>
+                                  </span>
+                                }
+                              </p>
+                            ) : (
+                              ""
+                            )
+                            : ''
+                            }
 
-                        <div className='post-img' id="open-modal">
-                          <img src="https://images.ctfassets.net/hrltx12pl8hq/7yQR5uJhwEkRfjwMFJ7bUK/dc52a0913e8ff8b5c276177890eb0129/offset_comp_772626-opt.jpg?fit=fill&w=800&h=300" alt="" />
+                          { commentData[item['id']] ? 
+                            <div className="comments">
+                              <span>
+                                {
+                                commentData[item['id']].length == 0
+                                  ? ""
+                                  : commentData[item['id']].length == 1
+                                    ? "View comment"
+                                    : commentData[item['id']].length > 1
+                                      ? "view all " +
+                                      commentData[item['id']].length +
+                                      " comments"
+                                      : ""}
+                              </span>
+                              {commentData[item['id']].length > 0 ? (
+                                <span>
+                                  <p>
+                                    <b> {commentData[item['id']][0].username}</b>{" "}
+                                    {commentData[item['id']][0].comment}
+                                  </p>
+                                </span>
+                              ) : (
+                                ""
+                              )
+                              }
+                            </div>
+                             : ''}
+                          </IonGrid>
                         </div>
-                      </div>
-                    </IonItem>
-                  </div>
-                  <div className='action-wrap'>
-                    <IonGrid >
-                      <IonRow>
-                        <IonCol col-3 className='ion-no-padding'>
-                          <IonButton expand="block" fill='clear'>
-                            <IonIcon icon={thumbsUp} />
-                          </IonButton>
-                        </IonCol>
-                        <IonCol col-3 className='ion-no-padding'>
-                          <IonButton expand="block" fill='clear'>
-                            <IonIcon icon={chatbubbles} />
-                          </IonButton>
-                        </IonCol>
-                        <IonCol col-3 className='ion-no-padding'>
-                          <IonButton expand="block" fill='clear'>
-                            <IonIcon icon={shareSocial} />
-                          </IonButton>
-                        </IonCol>
-                      </IonRow>
-                    </IonGrid>
-                  </div>
-                </IonCardContent>
-              </IonCard>
-              <IonCard>
-                <IonItem lines="none">
-                  <IonThumbnail slot="start">
-                    <img src='/assets/images/pk.png' alt="" />
-                  </IonThumbnail>
-                  <IonLabel className='ion-justify-content-between'>
-                    <div className='ion-inline'>
-                      <div>
-                        <h2>Pk</h2>
-                        <p>36 min ago</p>
-                      </div>
-                      <div>
-                        <IonIcon id="trigger3" icon={ellipsisVertical} />
-                        <IonPopover trigger="trigger3" size="auto">
-                          <IonContent class="ion-padding">Hello!</IonContent>
-                        </IonPopover>
-                      </div>
-                    </div>
-                  </IonLabel>
-                </IonItem>
-                <IonCardContent>
-                  <div className='post-detail-wrap'>
-                  <IonItem className='ion-no-padding' lines="none">
-                      <div className='' key={"3"}>
-                        <p>
-                          {ReadyArray.includes('3') ? "Keep close to Nature's heart and break clear away, once in awhile, and climb a mountain or spend a week in the woods. Wash your spirit clean" : `${`Keep close to Nature's heart and break clear away, once in awhile,
-                          and climb a mountain or spend a week in the woods. Wash your spirit clean`.substring(0, 40)}...`}
-                          <span className='readmore' onClick={() => handleClick("3")}>{ReadyArray.includes('1') ? " Show less" : " Read more"}</span></p>
-
-                        <div className='post-img' id="open-modal">
-                          <img src="https://images.ctfassets.net/hrltx12pl8hq/7yQR5uJhwEkRfjwMFJ7bUK/dc52a0913e8ff8b5c276177890eb0129/offset_comp_772626-opt.jpg?fit=fill&w=800&h=300" alt="" />
-                        </div>
-                      </div>
-                    </IonItem>
-                  </div>
-                  <div className='action-wrap'>
-                    <IonGrid >
-                      <IonRow>
-                        <IonCol col-3 className='ion-no-padding'>
-                          <IonButton expand="block" fill='clear'>
-                            <IonIcon icon={thumbsUp} />
-                          </IonButton>
-                        </IonCol>
-                        <IonCol col-3 className='ion-no-padding'>
-                          <IonButton expand="block" fill='clear'>
-                            <IonIcon icon={chatbubbles} />
-                          </IonButton>
-                        </IonCol>
-                        <IonCol col-3 className='ion-no-padding'>
-                          <IonButton expand="block" fill='clear'>
-                            <IonIcon icon={shareSocial} />
-                          </IonButton>
-                        </IonCol>
-                      </IonRow>
-                    </IonGrid>
-                  </div>
-                </IonCardContent>
-              </IonCard>
-              <IonCard>
-                <IonItem lines="none">
-                  <IonThumbnail slot="start">
-                    <img src='/assets/images/pk.png' alt="" />
-                  </IonThumbnail>
-                  <IonLabel className='ion-justify-content-between'>
-                    <div className='ion-inline'>
-                      <div>
-                        <h2>Pk</h2>
-                        <p>36 min ago</p>
-                      </div>
-                      <div>
-                        <IonIcon id="trigger4" icon={ellipsisVertical} />
-                        <IonPopover trigger="trigger4" size="auto">
-                          <IonContent class="ion-padding">Hello!</IonContent>
-                        </IonPopover>
-                      </div>
-                    </div>
-                  </IonLabel>
-                </IonItem>
-                <IonCardContent>
-                  <div className='post-detail-wrap'>
-                  <IonItem className='ion-no-padding' lines="none">
-                      <div className='' key={"4"}>
-                        <p>
-                          {ReadyArray.includes('4') ? "Keep close to Nature's heart and break clear away, once in awhile, and climb a mountain or spend a week in the woods. Wash your spirit clean" : `${`Keep close to Nature's heart and break clear away, once in awhile,
-                          and climb a mountain or spend a week in the woods. Wash your spirit clean`.substring(0, 40)}...`}
-                          <span className='readmore' onClick={() => handleClick("4")}>{ReadyArray.includes('1') ? " Show less" : " Read more"}</span></p>
-
-                        <div className='post-img' id="open-modal">
-                          <img src="https://images.ctfassets.net/hrltx12pl8hq/7yQR5uJhwEkRfjwMFJ7bUK/dc52a0913e8ff8b5c276177890eb0129/offset_comp_772626-opt.jpg?fit=fill&w=800&h=300" alt="" />
-                        </div>
-                      </div>
-                    </IonItem>
-                  </div>
-                  <div className='action-wrap'>
-                    <IonGrid >
-                      <IonRow>
-                        <IonCol col-3 className='ion-no-padding'>
-                          <IonButton expand="block" fill='clear'>
-                            <IonIcon icon={thumbsUp} />
-                          </IonButton>
-                        </IonCol>
-                        <IonCol col-3 className='ion-no-padding'>
-                          <IonButton expand="block" fill='clear'>
-                            <IonIcon icon={chatbubbles} />
-                          </IonButton>
-                        </IonCol>
-                        <IonCol col-3 className='ion-no-padding'>
-                          <IonButton expand="block" fill='clear'>
-                            <IonIcon icon={shareSocial} />
-                          </IonButton>
-                        </IonCol>
-                      </IonRow>
-                    </IonGrid>
-                  </div>
-                </IonCardContent>
-              </IonCard>
-              <IonCard>
-                <IonItem lines="none">
-                  <IonThumbnail slot="start">
-                    <img src='/assets/images/pk.png' alt="" />
-                  </IonThumbnail>
-                  <IonLabel className='ion-justify-content-between'>
-                    <div className='ion-inline'>
-                      <div>
-                        <h2>Pk</h2>
-                        <p>36 min ago</p>
-                      </div>
-                      <div>
-                        <IonIcon id="trigger5" icon={ellipsisVertical} />
-                        <IonPopover trigger="trigger5" size="auto">
-                          <IonContent class="ion-padding">Hello!</IonContent>
-                        </IonPopover>
-                      </div>
-                    </div>
-                  </IonLabel>
-                </IonItem>
-                <IonCardContent>
-                  <div className='post-detail-wrap'>
-                  <IonItem className='ion-no-padding' lines="none">
-                      <div className='' key={"5"}>
-                        <p>
-                          {ReadyArray.includes('5') ? "Keep close to Nature's heart and break clear away, once in awhile, and climb a mountain or spend a week in the woods. Wash your spirit clean" : `${`Keep close to Nature's heart and break clear away, once in awhile,
-                          and climb a mountain or spend a week in the woods. Wash your spirit clean`.substring(0, 50)}...`}
-                          <span className='readmore' onClick={() => handleClick("5")}>{ReadyArray.includes('1') ? " Show less" : " Read more"}</span></p>
-
-                        <div className='post-img' id="open-modal">
-                          <img src="https://images.ctfassets.net/hrltx12pl8hq/7yQR5uJhwEkRfjwMFJ7bUK/dc52a0913e8ff8b5c276177890eb0129/offset_comp_772626-opt.jpg?fit=fill&w=800&h=300" alt="" />
-                        </div>
-                      </div>
-                    </IonItem>
-                  </div>
-                  <div className='action-wrap'>
-                    <IonGrid >
-                      <IonRow>
-                        <IonCol col-3 className='ion-no-padding'>
-                          <IonButton expand="block" fill='clear'>
-                            <IonIcon icon={thumbsUp} />
-                          </IonButton>
-                        </IonCol>
-                        <IonCol col-3 className='ion-no-padding'>
-                          <IonButton expand="block" fill='clear'>
-                            <IonIcon icon={chatbubbles} />
-                          </IonButton>
-                        </IonCol>
-                        <IonCol col-3 className='ion-no-padding'>
-                          <IonButton expand="block" fill='clear'>
-                            <IonIcon icon={shareSocial} />
-                          </IonButton>
-                        </IonCol>
-                      </IonRow>
-                    </IonGrid>
-                  </div>
-                </IonCardContent>
-              </IonCard>
-              <IonCard>
-                <IonItem lines="none">
-                  <IonThumbnail slot="start">
-                    <img src='/assets/images/pk.png' alt="" />
-                  </IonThumbnail>
-                  <IonLabel className='ion-justify-content-between'>
-                    <div className='ion-inline'>
-                      <div>
-                        <h2>Pk</h2>
-                        <p>36 min ago</p>
-                      </div>
-                      <div>
-                        <IonIcon id="trigger6" icon={ellipsisVertical} />
-                        <IonPopover trigger="trigger6" size="auto">
-                          <IonContent class="ion-padding">Hello!</IonContent>
-                        </IonPopover>
-                      </div>
-                    </div>
-                  </IonLabel>
-                </IonItem>
-                <IonCardContent>
-                  <div className='post-detail-wrap'>
-                  <IonItem className='ion-no-padding' lines="none">
-                      <div className='' key={"6"}>
-                        <p>
-                          {ReadyArray.includes('6') ? "Keep close to Nature's heart and break clear away, once in awhile, and climb a mountain or spend a week in the woods. Wash your spirit clean" : `${`Keep close to Nature's heart and break clear away, once in awhile,
-                          and climb a mountain or spend a week in the woods. Wash your spirit clean`.substring(0, 60)}...`}
-                          <span className='readmore' onClick={() => handleClick("6")}>{ReadyArray.includes('1') ? " Show less" : " Read more"}</span></p>
-                        <div className='post-img' id="open-modal">
-                          <img src="https://images.ctfassets.net/hrltx12pl8hq/7yQR5uJhwEkRfjwMFJ7bUK/dc52a0913e8ff8b5c276177890eb0129/offset_comp_772626-opt.jpg?fit=fill&w=800&h=300" alt="" />
-                        </div>
-                      </div>
-                    </IonItem>
-                  </div>
-                  <div className='action-wrap'>
-                    <IonGrid >
-                      <IonRow>
-                        <IonCol col-3 className='ion-no-padding'>
-                          <IonButton expand="block" fill='clear'>
-                            <IonIcon icon={thumbsUp} />
-                          </IonButton>
-                        </IonCol>
-                        <IonCol col-3 className='ion-no-padding'>
-                          <IonButton expand="block" fill='clear'>
-                            <IonIcon icon={chatbubbles} />
-                          </IonButton>
-                        </IonCol>
-                        <IonCol col-3 className='ion-no-padding'>
-                          <IonButton expand="block" fill='clear'>
-                            <IonIcon icon={shareSocial} />
-                          </IonButton>
-                        </IonCol>
-                      </IonRow>
-                    </IonGrid>
-                  </div>
-                </IonCardContent>
-              </IonCard>
+                      </IonCardContent>
+                  </IonCard>
+                                 ))}
             </div>
-            <IonInfiniteScroll
-              onIonInfinite={loadData}
-              threshold="100px"
-              disabled={isInfiniteDisabled}
-            >
-              <IonInfiniteScrollContent
-                loadingSpinner="bubbles"
-                loadingText="Loading more data..."
-              ></IonInfiniteScrollContent>
-            </IonInfiniteScroll>
-            {/* <IonGrid class="ion-no-padding">
-              <IonRow>
-                <IonCol>
-                  <IonCard routerLink="/cardiology">
-                    <IonCardHeader>
-                      <div className='card-icon'>
-                        <img src="/assets/images/heartbeat.png" alt="" />
-                      </div>
-                    </IonCardHeader>
-                    <IonCardContent>
-                      <IonCardTitle>Cardiology</IonCardTitle>
-                      <h4>46 Specialist</h4>
-                    </IonCardContent>
-                  </IonCard>
-                </IonCol>
-                <IonCol>
-                  <IonCard routerLink="/profile/">
-                    <IonCardHeader>
-                      <div className='card-icon'>
-                        <img src="/assets/images/dentistry.png" alt="" />
-                      </div>
-                    </IonCardHeader>
-                    <IonCardContent>
-                      <IonCardTitle>Dentistry</IonCardTitle>
-                      <h4>30 Specialist</h4>
-                    </IonCardContent>
-                  </IonCard>
-                </IonCol>
-                <IonCol>
-                  <IonCard routerLink="/psychiatry">
-                    <IonCardHeader>
-                      <div className='card-icon'>
-                        <img src="/assets/images/brain.png" alt="" />
-                      </div>
-                    </IonCardHeader>
-                    <IonCardContent>
-                      <IonCardTitle>Psychiatry</IonCardTitle>
-                      <h4>20 Specialist</h4>
-                    </IonCardContent>
-                  </IonCard>
-                </IonCol>
-                <IonCol>
-                  <IonCard routerLink="/pediatrian">
-                    <IonCardHeader>
-                      <div className='card-icon'>
-                        <img src="/assets/images/child.png" alt="" />
-                      </div>
-                    </IonCardHeader>
-                    <IonCardContent>
-                      <IonCardTitle>Pediatrian</IonCardTitle>
-                      <h4>50 Specialist</h4>
-                    </IonCardContent>
-                  </IonCard>
-                </IonCol>
-                <IonCol>
-                  <IonCard>
-                    <IonCardHeader>
-                      <div className='card-icon'>
-                        <img src="/assets/images/knee.png" alt="" />
-                      </div>
-                    </IonCardHeader>
-                    <IonCardContent>
-                      <IonCardTitle>Cardiology</IonCardTitle>
-                      <h4>24 Specialist</h4>
-                    </IonCardContent>
-                  </IonCard>
-                </IonCol>
-                <IonCol>
-                  <IonCard>
-                    <IonCardHeader>
-                      <div className='card-icon'>
-                        <img src="/assets/images/path 2335.png" alt="" />
-                      </div>
-                    </IonCardHeader>
-                    <IonCardContent>
-                      <IonCardTitle>Dentistry</IonCardTitle>
-                      <h4>10 Specialist</h4>
-                    </IonCardContent>
-                  </IonCard>
-                </IonCol>
-                <IonCol>
-                  <IonCard>
-                    <IonCardHeader>
-                      <div className='card-icon'>
-                        <img src="/assets/images/heartbeat.png" alt="" />
-                      </div>
-                    </IonCardHeader>
-                    <IonCardContent>
-                      <IonCardTitle>Psychiatry</IonCardTitle>
-                      <h4>12 Specialist</h4>
-                    </IonCardContent>
-                  </IonCard>
-                </IonCol>
-                <IonCol>
-                  <IonCard>
-                    <IonCardHeader>
-                      <div className='card-icon'>
-                        <img src="/assets/images/heartbeat.png" alt="" />
-                      </div>
-                    </IonCardHeader>
-                    <IonCardContent>
-                      <IonCardTitle>Cardiology</IonCardTitle>
-                      <h4>70 Specialist</h4>
-                    </IonCardContent>
-                  </IonCard>
-                </IonCol>
-                <IonCol>
-                  <IonCard>
-                    <IonCardHeader>
-                      <div className='card-icon'>
-                        <img src="/assets/images/heartbeat.png" alt="" />
-                      </div>
-                    </IonCardHeader>
-                    <IonCardContent>
-                      <IonCardTitle>Cardiology</IonCardTitle>
-                      <h4>60 Specialist</h4>
-                    </IonCardContent>
-                  </IonCard>
-                </IonCol>
-                <IonCol>
-                  <IonCard>
-                    <IonCardHeader>
-                      <div className='card-icon'>
-                        <img src="/assets/images/heartbeat.png" alt="" />
-                      </div>
-                    </IonCardHeader>
-                    <IonCardContent>
-                      <IonCardTitle>Dentistry</IonCardTitle>
-                      <h4>70 Specialist</h4>
-                    </IonCardContent>
-                  </IonCard>
-                </IonCol>
-                <IonCol>
-                  <IonCard>
-                    <IonCardHeader>
-                      <div className='card-icon'>
-                        <img src="/assets/images/heartbeat.png" alt="" />
-                      </div>
-                    </IonCardHeader>
-                    <IonCardContent>
-                      <IonCardTitle>Psychiatry</IonCardTitle>
-                      <h4>70 Specialist</h4>
-                    </IonCardContent>
-                  </IonCard>
-                </IonCol>
-                <IonCol>
-                  <IonCard>
-                    <IonCardHeader>
-                      <div className='card-icon'>
-                        <img src="/assets/images/heartbeat.png" alt="" />
-                      </div>
-                    </IonCardHeader>
-                    <IonCardContent>
-                      <IonCardTitle>Test</IonCardTitle>
-                      <h4>70 Specialist</h4>
-                    </IonCardContent>
-                  </IonCard>
-                </IonCol>
-              </IonRow>
-            </IonGrid> */}
-          </section>
-          {/* <IonModal ref={modal} trigger="open-modal" onWillDismiss={(ev) => onWillDismiss(ev)}>
-            <IonHeader>
-              <IonToolbar>
-                <IonButtons slot="start">
-                  <IonButton onClick={() => modal.current?.dismiss()}>Cancel</IonButton>
-                </IonButtons>
-                <IonTitle>Welcome</IonTitle>
-                <IonButtons slot="end">
-                  <IonButton strong={true} onClick={() => confirm()}>
-                    Confirm
-                  </IonButton>
-                </IonButtons>
-              </IonToolbar>
-            </IonHeader>
-            <IonContent className="ion-padding">
-              <IonItem>
-                <div className='post-img'>
-                  <img src="https://images.ctfassets.net/hrltx12pl8hq/7yQR5uJhwEkRfjwMFJ7bUK/dc52a0913e8ff8b5c276177890eb0129/offset_comp_772626-opt.jpg?fit=fill&w=800&h=300" alt="" />
-                </div>
-              </IonItem>
-              <div className=''>
-                <IonGrid >
-                  <IonRow>
-                    <IonCol col-3 className='ion-no-padding'>
-                      <IonItem className='ion-no-padding ion-text-center'>
-                        <IonIcon icon={thumbsUp} />
-                      </IonItem>
-                    </IonCol>
-                    <IonCol col-3 className='ion-no-padding'>
-                      <IonItem className='ion-no-padding'>
-                        <IonIcon icon={chatbubbles} />
-                      </IonItem>
-                    </IonCol>
-                    <IonCol col-3 className='ion-no-padding'>
-                      <IonItem className='ion-no-padding'>
-                        <IonIcon icon={shareSocial} />
-                      </IonItem>
-                    </IonCol>
-                  </IonRow>
-                </IonGrid>
-              </div>
-            </IonContent>
-          </IonModal> */}
+            </section>
           <IonModal ref={modal} trigger="open-modal" presentingElement={presentingElement!}>
           <IonHeader>
             <IonToolbar>
