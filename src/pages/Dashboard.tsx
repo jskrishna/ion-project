@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from 'react';
 import axios from "axios";
 import { Share } from '@capacitor/share';
 import Constent from "../components/Constent";
-
+import { handleLike } from '../components/common/Actions';
 const Dashboard: React.FC = () => {
   const modal = useRef<HTMLIonModalElement>(null);
   const page = useRef(null);
@@ -74,7 +74,6 @@ const [commentData, setcommentData] = useState<any>([]);
         console.log('like--',res.data.like);
         console.log('comment--',res.data.comment);
         setShowLoading(false);
-       
       })
       .catch((e) => {
         console.log(e);
@@ -88,20 +87,11 @@ const [commentData, setcommentData] = useState<any>([]);
   });
   const [showLoading, setShowLoading] = useState(false);
 
-  const handleLike = (user_id: any, post_id: any, user_by: any) => {
-    let formData = new FormData();
-    formData.append("user_id", user_id);
-    formData.append("post_id", post_id);
-    formData.append("user_by", user_by);
-    api
-      .post("/makeLike", formData)
-      .then((res: any) => {
-        console.log(res.data);
-        getNewsFeed(loggedInData.id);
-      })
-      .catch((e) => {
-        console.log(e);
-      });
+  const handleLikeAction = (user_id: any, post_id: any, user_by: any) => {
+    handleLike(user_id,post_id,user_by);
+    setTimeout(() => {
+      getNewsFeed(loggedInData.id);
+    }, 1000);
   };
 
   return (
@@ -198,7 +188,7 @@ const [commentData, setcommentData] = useState<any>([]);
                               <IonCol col-3 className="ion-no-padding">
                                 <IonButton
                                   onClick={(e) =>
-                                    handleLike(
+                                    handleLikeAction(
                                       item['user_id'],
                                       item['id'],
                                       loggedInData.id

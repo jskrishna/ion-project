@@ -60,6 +60,7 @@ import { useHistory } from "react-router-dom";
           setYesNotify(res.data.yesterday);
           setOlderNotify(res.data.older);
           setShowLoading(false);
+          getFollowing();
         })
         .catch((e) => {
           console.log(e);
@@ -89,11 +90,52 @@ import { useHistory } from "react-router-dom";
     useIonViewDidEnter(()=>{
       // setShowLoading(true);
       getNotify();
+
     })
 
     const api = axios.create({
       baseURL: Constent.BASE_URL,
     });
+
+    const removeRequest = (analy_id:any,follow_by:any,follow_to:any) =>{
+      let formData = new FormData();
+    formData.append("analy_id", analy_id);
+    formData.append("follow_by", follow_by);
+    formData.append("follow_to", follow_to);
+      api.post('/removeNotification', formData)
+      .then((res: any) => {
+        getNotify();
+      })
+      .catch((e) => {
+        console.log(e);
+        setShowLoading(false);
+      });
+    }
+
+    const followBack = (follow_to:any) => {
+        api.get(`/addfollow?user_id=`+ loggedInData.id+`&follow_to=`+follow_to +`&request=accepted`)
+        .then((res: any) => {
+          getNotify();
+        })
+        .catch((e) => {
+          console.log(e);
+          setShowLoading(false);
+        });
+    }
+
+    const [following, setFollowing] = useState([]);
+
+    const getFollowing = () => {
+      api
+        .get(`/following/` + loggedInData.id)
+        .then((res: any) => {
+          console.log('following--',res.data.data);
+          setFollowing(res.data.data);
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    }
   
     return (
       <>
@@ -148,7 +190,9 @@ import { useHistory } from "react-router-dom";
 
                 item['user_by'] != loggedInData.id ? 
                     <IonCard key={index}>
-                      <IonItem routerLink={item['type'] == 'follow' ? '/user/'+ item['username']:"/singlepost/"+item['post_id']} lines="none">
+                      <IonItem 
+                      // routerLink={item['type'] == 'follow' ? '/user/'+ item['username']:"/singlepost/"+item['post_id']} 
+                      lines="none">
                       <IonAvatar slot="start">
                         <img alt='avatar' src={item['profile'] ? item['profile']: "/assets/images/user.png"}/>
                     </IonAvatar>
@@ -159,9 +203,15 @@ import { useHistory } from "react-router-dom";
                         </p>
                         : 
                        (item['type'] == 'follow' ?
+                       (item['request'] == 'pending' ? 
+                       <p>
+                       <b> {item['username']} has request to follow you</b>.
+                      </p>
+                       :
                        <p>
                         <b> {item['username']} Follow you</b>.
                        </p>
+                       )
                        :
                        <p>
                       <b>{item['username']}</b> commented<b> {item['comment']}</b> your post.
@@ -169,7 +219,7 @@ import { useHistory } from "react-router-dom";
                        )
                         }
                         {
-                            <p>{human(new Date(item['created_at']))}</p>
+                          <p>{human(new Date(item['created_at']))}</p>
                         }
                         </IonLabel>
                         <IonAvatar slot="end">
@@ -191,7 +241,32 @@ import { useHistory } from "react-router-dom";
                       item['type'] == 'follow' ? 
                       <div>
                         <IonButton>
-                          <IonLabel>Follow Back</IonLabel>
+                          <IonLabel>
+                            {
+                                (item['type'] == 'follow' ?
+                                (item['request'] == 'pending' ? 
+                                  <IonButtons>
+                                    <IonButton className="btn-primary">Accept</IonButton>
+                                    <IonButton onClick={(e)=> removeRequest(item['id'],item['user_by'],item['user_id'])}>Remove</IonButton>
+                                  </IonButtons>
+                                : (
+                                  following.some((el:any) => el.id === item['user_by'])
+                                   ? 
+                                <IonButtons>
+                                <IonButton>Following</IonButton>
+                               </IonButtons>
+                              : 
+                                <IonButtons>
+                                <IonButton onClick={(e)=>followBack(item['user_by'])}>Follow Back</IonButton>
+                                <IonButton onClick={(e)=> removeRequest(item['id'],item['user_by'],item['user_id'])}>Remove</IonButton>
+                            </IonButtons>
+                                )
+                                 
+                                )
+                                :''
+                                )
+                            }
+                          </IonLabel>
                         </IonButton>
                     </div>
                       :''
@@ -213,7 +288,9 @@ import { useHistory } from "react-router-dom";
                 item['user_by'] != loggedInData.id ? 
                     
                     <IonCard key={index}>
-                      <IonItem routerLink={item['type'] == 'follow' ? '/user/'+ item['username']:"/singlepost/"+item['post_id']} lines="none">
+                      <IonItem 
+                      // routerLink={item['type'] == 'follow' ? '/user/'+ item['username']:"/singlepost/"+item['post_id']} 
+                      lines="none">
 
                       <IonAvatar slot="start">
                         <img alt='avatar' src={item['profile'] ? item['profile']: "/assets/images/user.png"}/>
@@ -225,9 +302,15 @@ import { useHistory } from "react-router-dom";
                         </p>
                         : 
                        (item['type'] == 'follow' ?
+                       (item['request'] == 'pending' ? 
+                       <p>
+                       <b> {item['username']} has request to follow you</b>.
+                      </p>
+                       :
                        <p>
                         <b> {item['username']} Follow you</b>.
                        </p>
+                       )
                        :
                        <p>
                       <b>{item['username']}</b> commented<b> {item['comment']}</b> your post.
@@ -235,7 +318,7 @@ import { useHistory } from "react-router-dom";
                        )
                         }
                         {
-                            <p>{human(new Date(item['created_at']))}</p>
+                         <p>{human(new Date(item['created_at']))}</p>
                         }
                         </IonLabel>
                         <IonAvatar slot="end">
@@ -257,7 +340,32 @@ import { useHistory } from "react-router-dom";
                       item['type'] == 'follow' ? 
                       <div>
                         <IonButton>
-                          <IonLabel>Follow Back</IonLabel>
+                          <IonLabel>
+                            {
+                                (item['type'] == 'follow' ?
+                                (item['request'] == 'pending' ? 
+                                  <IonButtons>
+                                    <IonButton className="btn-primary">Accept</IonButton>
+                                    <IonButton onClick={(e)=> removeRequest(item['id'],item['user_by'],item['user_id'])}>Remove</IonButton>
+                                  </IonButtons>
+                                :
+                                (
+                                  following.some((el:any) => el.id === item['user_by'])
+                                  ? 
+                                <IonButtons>
+                                <IonButton>Following</IonButton>
+                               </IonButtons>
+                              : 
+                                <IonButtons>
+                                <IonButton onClick={(e)=>followBack(item['user_by'])}>Follow Back</IonButton>
+                                <IonButton onClick={(e)=> removeRequest(item['id'],item['user_by'],item['user_id'])}>Remove</IonButton>
+                            </IonButtons>
+                                )
+                                )
+                                :''
+                                )
+                            }
+                          </IonLabel>
                         </IonButton>
                     </div>
                       :''
@@ -276,7 +384,9 @@ import { useHistory } from "react-router-dom";
                 item['user_by'] != loggedInData.id ? 
 
                     <IonCard key={index}>
-                      <IonItem routerLink={item['type'] == 'follow' ? '/user/'+ item['username']:"/singlepost/"+item['post_id']} lines="none">
+                      <IonItem 
+                      // routerLink={item['type'] == 'follow' ? '/user/'+ item['username']:"/singlepost/"+item['post_id']} 
+                      lines="none">
                       <IonAvatar slot="start">
                         <img alt='avatar' src={item['profile'] ? item['profile']: "/assets/images/user.png"}/>
                     </IonAvatar>
@@ -287,9 +397,15 @@ import { useHistory } from "react-router-dom";
                         </p>
                         : 
                        (item['type'] == 'follow' ?
+                       (item['request'] == 'pending' ? 
+                       <p>
+                       <b> {item['username']} has request to follow you</b>.
+                      </p>
+                       :
                        <p>
                         <b> {item['username']} Follow you</b>.
                        </p>
+                       )
                        :
                        <p>
                       <b>{item['username']}</b> commented<b> {item['comment']}</b> your post.
@@ -297,7 +413,7 @@ import { useHistory } from "react-router-dom";
                        )
                         }
                         {
-                            <p>{human(new Date(item['created_at']))}</p>
+                       <p>{human(new Date(item['created_at']))}</p>
                         }
                         </IonLabel>
                         <IonAvatar slot="end">
@@ -319,11 +435,37 @@ import { useHistory } from "react-router-dom";
                       item['type'] == 'follow' ? 
                       <div>
                         <IonButton>
-                          <IonLabel>Follow Back</IonLabel>
+                          <IonLabel>
+                            {
+                                (item['type'] == 'follow' ?
+                                (item['request'] == 'pending' ? 
+                                  <IonButtons>
+                                    <IonButton className="btn-primary">Accept</IonButton>
+                                    <IonButton onClick={(e)=> removeRequest(item['id'],item['user_by'],item['user_id'])}>Remove</IonButton>
+                                  </IonButtons>
+                                :
+                                (
+                                  following.some((el:any) => el.id === item['user_by'])
+                                   ? 
+                                <IonButtons>
+                                <IonButton>Following</IonButton>
+                               </IonButtons>
+                              : 
+                                <IonButtons>
+                                <IonButton onClick={(e)=>followBack(item['user_by'])}>Follow Back</IonButton>
+                                <IonButton onClick={(e)=> removeRequest(item['id'],item['user_by'],item['user_id'])}>Remove</IonButton>
+                            </IonButtons>
+                                )
+                                )
+                                :''
+                                )
+                            }
+                          </IonLabel>
                         </IonButton>
                     </div>
                       :''
                     }
+
                       </IonItem>
                     </IonCard>
                     :''
