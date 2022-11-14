@@ -734,6 +734,7 @@ const gridViewButton = () => {
               </IonGrid>
             </div>
           </section>
+
           <IonModal ref={modal} trigger="followers-modal">
                 <IonHeader>
                   <IonToolbar>
@@ -748,7 +749,7 @@ const gridViewButton = () => {
                     {
                       followers.map((item:any,index:any) => (
                         <IonItem key={index}>
-                        <IonAvatar>
+                        <IonAvatar className="user-image-wrap">
                             <img
                               text-center="true"
                               src={
@@ -759,7 +760,7 @@ const gridViewButton = () => {
                               alt=""
                             />
                           </IonAvatar>
-                          <IonLabel>
+                          <IonLabel className="user-name-wrap">
                             <h2>{item['username']}</h2>
                             <p>follow you</p>
                           </IonLabel>
@@ -785,7 +786,7 @@ const gridViewButton = () => {
                     {
                       following.map((item:any,index:any) => (
                         <IonItem key={index}>
-                        <IonAvatar>
+                        <IonAvatar className="user-image-wrap">
                             <img
                               text-center="true"
                               src={
@@ -796,7 +797,7 @@ const gridViewButton = () => {
                               alt=""
                             />
                           </IonAvatar>
-                          <IonLabel>
+                          <IonLabel className="user-name-wrap">
                             <h2>{item['username']}</h2>
                             <p>follow by you</p>
                           </IonLabel>

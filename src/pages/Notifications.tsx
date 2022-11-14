@@ -183,11 +183,8 @@ import { useHistory } from "react-router-dom";
             <section>
             {TodayNotify.length > 0 ?
               <IonItemGroup>
-              <IonItemDivider>
-                  <IonLabel>Today</IonLabel>
-              </IonItemDivider>
+              <IonLabel>Today</IonLabel>
               {TodayNotify.length > 0 ? TodayNotify.sort((a:any, b:any) => b.id - a.id).map((item: any, index) => (
-
                 item['user_by'] != loggedInData.id ? 
                     <IonCard key={index}>
                       <IonItem 
@@ -280,13 +277,9 @@ import { useHistory } from "react-router-dom";
 
               {YesNotify.length > 0 ?
               <IonItemGroup>
-              <IonItemDivider>
                   <IonLabel>Yesterday</IonLabel>
-                  
-              </IonItemDivider>
               {YesNotify.length > 0 ? YesNotify.sort((a:any, b:any) => b.id - a.id).map((item: any, index) => (
                 item['user_by'] != loggedInData.id ? 
-                    
                     <IonCard key={index}>
                       <IonItem 
                       // routerLink={item['type'] == 'follow' ? '/user/'+ item['username']:"/singlepost/"+item['post_id']} 
@@ -377,9 +370,7 @@ import { useHistory } from "react-router-dom";
               </IonItemGroup> :''}
               {OlderNotify.length > 0 ?
               <IonItemGroup>
-              <IonItemDivider >
                   <IonLabel >Older</IonLabel>
-              </IonItemDivider>
               {OlderNotify.length > 0 ? OlderNotify.sort((a:any, b:any) => b.id - a.id).map((item: any, index) => (
                 item['user_by'] != loggedInData.id ? 
 

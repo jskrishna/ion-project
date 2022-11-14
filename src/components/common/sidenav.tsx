@@ -26,19 +26,19 @@ const SideNav: React.FC = () => {
         <IonContent className="no-padding">
           <IonList className='menu-wrap'>
             <IonItem routerLink="/dashboard/">
-            <IonIcon icon={homeOutline} />
+            <IonIcon className='menu-icon' icon={homeOutline} />
               <IonLabel>Dashboard</IonLabel>
             </IonItem>
             <IonItem routerLink="/new-post">
-            <IonIcon icon={addCircle} />
+            <IonIcon className='menu-icon' icon={addCircle} />
               <IonLabel>New Post</IonLabel>
             </IonItem>
             <IonItem routerLink="/archived">
-            <IonIcon icon={archiveOutline} />
+            <IonIcon className='menu-icon' icon={archiveOutline} />
               <IonLabel>Archived</IonLabel>
             </IonItem>
             <IonItem routerLink="/profile/">
-            <IonIcon icon={person} />
+            <IonIcon className='menu-icon' icon={person} />
               <IonLabel>Profile</IonLabel>
             </IonItem>
           </IonList>

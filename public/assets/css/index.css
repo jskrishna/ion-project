@@ -108,15 +108,15 @@ ion-loading.custom-loading {
   color: #1c6dff;
 }
 .readmore {
-    background-color: transparent;
-    color: var(--ion-color-primary, #3880ff);
-    cursor: pointer;
+  background-color: transparent;
+  color: var(--ion-color-primary, #3880ff);
+  cursor: pointer;
 }
 ion-avatar {
-  --border-radius:0;
+  --border-radius: 0;
 }
-.user-bio{
-  white-space:pre;
+.user-bio {
+  white-space: pre;
 }
 /* ion-col {
   background-color: #135d54;
@@ -125,9 +125,8 @@ ion-avatar {
   text-align: center;
 } */
 
-
 body {
-  font-family: 'Helvetica';
+  font-family: "Helvetica";
   background-color: #0e2439;
 }
 
@@ -138,10 +137,9 @@ body {
 }
 
 .filter-buttons .active-view {
-  color:white;
-  background: var(--ion-color-primary, #3880ff)
+  color: white;
+  background: var(--ion-color-primary, #3880ff);
 }
-
 
 .list-view-button,
 .grid-view-button {
@@ -153,13 +151,18 @@ body {
   border-radius: 3px;
 }
 
-.post-img img, .post-img video, .post-img audio{
+.post-img img,
+.post-img video,
+.post-img audio {
   object-position: center;
   min-height: 240px;
-  max-height: 240px;
   object-fit: contain;
   display: block;
   width: 100%;
+}
+.grid-view-filter .post-img img,
+.grid-view-filter .post-img video {
+  max-height: 240px;
 }
 
 .list a {
@@ -215,7 +218,9 @@ ion-textarea {
   max-height: 100px;
   max-width: 300px;
 }
-.grid-view-filter .action-wrap, .grid-view-filter .item-top, .grid-view-filter .post-img-top p {
+.grid-view-filter .action-wrap,
+.grid-view-filter .item-top,
+.grid-view-filter .post-img-top p {
   display: none;
 }
 .grid-view-filter a ion-card-content {
@@ -236,9 +241,9 @@ ion-textarea {
 }
 .profile-top-wrap ion-avatar.md {
   min-width: 100px;
-    height: 100%;
-    margin-right: 20px;
-    max-height: 100px;
+  height: 100%;
+  margin-right: 20px;
+  max-height: 100px;
 }
 .follower-dtl {
   display: flex;
@@ -256,17 +261,67 @@ ion-textarea {
 .follower-dtl > div {
   text-align: center;
 }
-.follower-dtl  h4 {
+.follower-dtl h4 {
   margin-bottom: 0;
 }
 .follower-dtl p {
   margin-top: 0;
 }
-
-@media(max-width:767px) {
-  .list ion-card {
+.user-image-wrap {
+  margin-right: 10px;
+  width: 60px;
+  height: 60px;
+}
+.user-image-wrap img,
+.notification-img img,
+.post-header-wrap img {
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: top;
+}
+.post-header-wrap {
+  display: flex;
+}
+.post-header-right {
+  margin-left: 10px;
+}
+.post-header-right p {
+  color: #818181;
+}
+ion-list.menu-wrap.md.list-md {
+  padding: 0;
+}
+.menu-icon {
+  margin-right: 10px;
+}
+.ion-activatable .item-native {
+  background: #5e5e5e;
+}
+@media (max-width: 767px) {
+  .grid-view-filter ion-card {
+    max-width: calc(33.3% - 10px);
+    min-width: calc(33.3% - 10px);
+    margin: 5px;
+  }
+  .list-view-filter ion-card {
     max-width: 100%;
     min-width: 100%;
     margin: 10px 0;
-}
+  }
+  .follower-dtl p {
+    font-size: 12px;
+  }
+  .profile-top-wrap ion-avatar.md {
+    min-width: 60px;
+    margin-right: 10px;
+    max-height: 60px;
+  }
+  .grid-view-filter .post-img img,
+  .grid-view-filter .post-img video {
+    max-height: 100px;
+    min-height: 100px;
+  }
+  :host() .sc-ion-searchbar-md-h {
+    box-shadow: none;
+  }
 }

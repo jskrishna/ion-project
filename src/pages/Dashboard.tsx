@@ -131,17 +131,17 @@ const [commentData, setcommentData] = useState<any>([]);
             <IonCard key={item['id']}>
                     <IonItem lines="none" className="">
                       <IonLabel className="ion-justify-content-between">
-                        <div className="ion-inline">
-                          <div>
+                        <div className="post-header-wrap">
+                          <div className='post-header-left'>
                             <IonAvatar>
                               <img src={item['profile']? item['profile'] : "/assets/images/user.png"} alt="profile" />
                             </IonAvatar>
-                            <h3>
+                          </div>
+                          <div className='post-header-right'>
+                          <h3>
                               <b>{item['username']}</b>
                             </h3>
                             <p>{human(new Date(item['created_at']))}</p>
-                          </div>
-                          <div>
                           </div>
                         </div>
                       </IonLabel>
